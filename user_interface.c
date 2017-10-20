@@ -10,13 +10,12 @@ int readConnectionParams(struct connection_params * params){
 
   int bytes_llegits;
 
-  printf("Entra per aquest ordre la @IP del servidor i el #port al que es vol connectar : \n");
+  printf("Entra la @IP i el #port del servidor al que es vol connectar : \n");
   printf("@IP : \n");
   if(bytes_llegits=read(0,buffer,sizeof(buffer))==-1){ return (-1); }
   else{
     memset(params->ip, '\0', sizeof(buffer));
     strncpy(params->ip, buffer, strlen(buffer) - 1);
-    printf("%s\n", params->ip);
   }
   strcpy(buffer, "");
   printf("#port : \n");
@@ -37,9 +36,7 @@ int printConnectionParams(struct connection_params params){
 }
 
 int printFunctionResult(int result){
-  printf("resultat : %i\n", result);
   if(result < 0){
-    printf("ERROR !! \n");
     struct error e = parseResult(result);
     printError(& e);
   }

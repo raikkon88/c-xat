@@ -7,13 +7,12 @@
 
 
 /* Es crea el socket (local) TCP sesc del servidor */
-int create_socket(int sesc){
-
-	if((sesc=socket(AF_INET,SOCK_STREAM,0))==-1)
+int create_socket(int fd){
+	if((fd=socket(AF_INET,SOCK_STREAM,0))==-1)
 	{
 		return -100;
 	}
-	return sesc;
+	return fd;
 }
 
 /* S’assigna @IP i #port TCP a sesc: l’@IP ha de ser una de les @IP de la màquina i el */
@@ -33,16 +32,10 @@ struct sockaddr_in create_socket_struct(int port, char inet[]){
 }
 
 int make_connection(int fileDescriptor, struct sockaddr_in * address){
-	printf("anem per Connectar\n");
 	if((connect(fileDescriptor,(struct sockaddr*)&address,sizeof(address)))==-1)
 	{
 		close(fileDescriptor);
-		printf("Error dins make connection retorna -101\n");
 		return (-101);
 	}
-	else{
-		printf("Connectat a %i \n", fileDescriptor);
-		return fileDescriptor;
-	}
-
+	return (0);
 }

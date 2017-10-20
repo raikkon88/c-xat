@@ -23,19 +23,20 @@ int main(int argc,char *argv[])
 	/* Es llegeixen els paràmetres de connexió del servidor */
 	printFunctionResult(readConnectionParams((struct connection_params*)&params));
 	/* L'adreca del socket del servidor (socket remot) */
-	printFunctionResult(create_socket(scon));
+	scon = create_socket(scon);
+	printFunctionResult(scon);
 	/* Es creen els sockets */
 	adrrem = create_socket_struct(params.port, params.ip);
 	/* S'obre la connexió */
 	printFunctionResult(make_connection(scon, & adrrem));
-
-	/*if((connect(scon,(struct sockaddr*)&adrrem,sizeof(adrrem)))==-1)
+/*
+	if((connect(scon,(struct sockaddr*)&adrrem,sizeof(adrrem)))==-1)
 	{
 		printf("Error dins make connection retorna -101\n");
 		close(scon);
 		exit(-1);
-	}*/
-
+	}
+*/
 	/* S'envia pel socket connectat scon el que es rep pel teclat */
 	if((bytes_llegits=read(0,buffer,sizeof(buffer)))==-1)
 	{
