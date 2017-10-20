@@ -61,23 +61,36 @@ int main(int argc,char *argv[])
 		close(sesc);
 		exit(-1);
 	}
-	
 	printf("Acceptada la connexió amb %i \n", scon); 
 	
-	/* S'escriu per pantalla el que arriba pel socket connectat scon */
+	// Llegeix
 	if((bytes_llegits=read(scon,buffer,sizeof(buffer)))==-1)
 	{
 		perror("read\n");
 		close(scon);
 		exit(-1);
 	}
-	
-	if((bytes_escrits=write(1,buffer,bytes_llegits))==-1)
-	{
-		perror("write\n");
-		close(scon);
-		exit(-1);
+	while(sizeof(bytes_llegits) != 0){
+		// Escriu
+		if((bytes_escrits=write(1,buffer,bytes_llegits))==-1)
+		{
+			perror("write\n");
+			close(scon);
+			exit(-1);
+		}
+		// Llegeix
+		if((bytes_llegits=read(scon,buffer,sizeof(buffer)))==-1)
+		{
+			perror("read\n");
+			close(scon);
+			exit(-1);
+		}
 	}
+	
+	
+	
+	
+	
 	/* Es tanquen els sockets scon (la connexió) i sesc */
 	close(scon);
 	close(sesc);
