@@ -4,6 +4,24 @@
  * USER INTERFACE CODE FILE.
  */
 
+int readFromKeyboard(struct string * inData){
+  int bytes_llegits;
+  char buffer[200] = "";
+  /* S'envia pel socket connectat scon el que es rep pel teclat */
+	if((bytes_llegits=read(0, buffer,sizeof(buffer)))==-1)
+	{
+    inData->number_bytes = -3;
+	}
+  else{
+    inData->number_bytes = strlen(buffer) - 1;
+    memset(inData->buffer, '\0', sizeof(buffer));
+    strncpy(inData->buffer, buffer, strlen(buffer) - 1);
+  }
+  return bytes_llegits;
+}
+
+int printOnScreen(char * bytes_llegits[]);
+
 int readConnectionParams(struct connection_params * params){
   char buffer[16] = "";
   int i;

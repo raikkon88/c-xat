@@ -1,6 +1,4 @@
 #include "interface_sockets.h"
-
-
 /**
  * Interfície de sockets compartida
  */
@@ -31,11 +29,22 @@ struct sockaddr_in create_socket_struct(int port, char inet[]){
 	return adrloc;
 }
 
-int make_connection(int fileDescriptor, struct sockaddr_in * address){
+int make_connection(int fileDescriptor, struct sockaddr_in address){
+
 	if((connect(fileDescriptor,(struct sockaddr*)&address,sizeof(address)))==-1)
 	{
 		close(fileDescriptor);
 		return (-101);
 	}
 	return (0);
+}
+
+int sendData(char data[], int number_bytes, int fileDescriptor){
+	int bytes_escrits;
+	if((bytes_escrits=write(fileDescriptor,data,number_bytes))==-1)
+	{
+		close(fileDescriptor);
+		return (-102);
+	}
+	return bytes_escrits;
 }

@@ -14,9 +14,11 @@ int main(int argc,char *argv[])
 	int scon, i;
 	int bytes_llegits, bytes_escrits;
 	char buffer[200];
+	char end[200] = "$";
 	int long_adrrem;
 	struct sockaddr_in adrrem;
 	struct connection_params params;
+	struct string inData;
 	//char iprem[16];
 	int portrem;
 
@@ -28,38 +30,16 @@ int main(int argc,char *argv[])
 	/* Es creen els sockets */
 	adrrem = create_socket_struct(params.port, params.ip);
 	/* S'obre la connexió */
-	printFunctionResult(make_connection(scon, & adrrem));
-/*
-	if((connect(scon,(struct sockaddr*)&adrrem,sizeof(adrrem)))==-1)
-	{
-		printf("Error dins make connection retorna -101\n");
-		close(scon);
-		exit(-1);
-	}
-*/
-	/* S'envia pel socket connectat scon el que es rep pel teclat */
-	if((bytes_llegits=read(0,buffer,sizeof(buffer)))==-1)
-	{
-		perror("read\n");
-		close(scon);
-		exit(-1);
-	}
-	printf("Nombre de bytes : %i", sizeof(bytes_llegits));
-	while(sizeof(bytes_llegits) != 0){
-		if((bytes_escrits=write(scon,buffer,bytes_llegits))==-1)
-		{
-			perror("write\n");
-			close(scon);
-			exit(-1);
-		}
+	printFunctionResult(make_connection(scon, adrrem));
+  /* Es llegeix de teclat el que es vol enviar */
+	readFromKeyboard(&inData);
+	printFunctionResult(inData.number_bytes);
+	while(strcmp(inData.buffer,end)){
 		/* S'envia pel socket connectat scon el que es rep pel teclat */
-		if((bytes_llegits=read(0,buffer,sizeof(buffer)))==-1)
-		{
-			perror("read\n");
-			close(scon);
-			exit(-1);
-		}
-		printf("Nombre de bytes : %i", sizeof(bytes_llegits));
+		sendData(inData.buffer,inData.number_bytes,scon);
+		readFromKeyboard(&inData);
+		printFunctionResult(inData.number_bytes);
+		printf("Nombre de bytes : %i", sizeof(inData.number_bytes));
 	}
 
 	/* Es tanca el socket scon (la connexió) */

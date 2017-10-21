@@ -12,6 +12,16 @@ struct connection_params{
   int port;
 };
 
+struct string{
+  char buffer[200];
+  int number_bytes;
+  int is_end;
+};
+
+int readFromKeyboard(struct string * inData);
+
+int printOnScreen(char * buffer[]);
+
 int printConnectionParams(struct connection_params params);
 
 int readConnectionParams(struct connection_params * params);
