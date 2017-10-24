@@ -67,11 +67,3 @@ int printError(struct error * e){
   printf(" CODE -> %i\n", e->code);
   exit(-1);
 }
-
-void print_socket_params(struct sockaddr_in socket){
-
-  	printf("TIPUS : %i", socket.sin_family );
-  	//adrloc.sin_port=htons(port);
-  	//adrloc.sin_addr.s_addr=inet_addr(inet); /* o bé: ...s_addr = INADDR_ANY */
-  	//for(i=0;i<8;i++){adrloc.sin_zero[i]='0';}
-}
