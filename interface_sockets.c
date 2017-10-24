@@ -113,7 +113,7 @@ struct string read_from_socket(int socket){
 
 int write_screen(struct string data, int socket){
 	int bytes_escrits;
-	if((bytes_escrits=write(1,data.buffer,data.number_bytes))==-1)
+	if((bytes_escrits=write(socket,data.buffer,data.number_bytes))==-1)
 	{
 		perror("write\n");
 		close(socket);
