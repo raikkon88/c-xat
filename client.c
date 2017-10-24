@@ -6,8 +6,9 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
-#include "interface_sockets.c"
 #include "user_interface.c"
+#include "interface_sockets.c"
+
 
 int main(int argc,char *argv[])
 {
@@ -19,7 +20,6 @@ int main(int argc,char *argv[])
 	struct sockaddr_in adrrem;
 	struct connection_params params;
 	struct string inData;
-	//char iprem[16];
 	int portrem;
 
 	/* Es llegeixen els paràmetres de connexió del servidor */
@@ -32,14 +32,11 @@ int main(int argc,char *argv[])
 	/* S'obre la connexió */
 	printFunctionResult(make_connection(scon, adrrem));
   /* Es llegeix de teclat el que es vol enviar */
-	readFromKeyboard(&inData);
-	printFunctionResult(inData.number_bytes);
 	while(strcmp(inData.buffer,end)){
-		/* S'envia pel socket connectat scon el que es rep pel teclat */
-		sendData(inData.buffer,inData.number_bytes,scon);
 		readFromKeyboard(&inData);
 		printFunctionResult(inData.number_bytes);
-		printf("Nombre de bytes : %i", sizeof(inData.number_bytes));
+		/* S'envia pel socket connectat scon el que es rep pel teclat */
+		send_data(inData.buffer,inData.number_bytes,scon);
 	}
 
 	/* Es tanca el socket scon (la connexió) */

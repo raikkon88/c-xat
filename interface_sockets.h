@@ -11,6 +11,14 @@ struct sockaddr_in create_socket_struct(int port, char inet[]);
 
 int make_connection(int fileDescriptor, struct sockaddr_in address);
 
-int sendData(char data[], int number_bytes, int fileDescriptor);
+int send_data(char data[], int number_bytes, int fileDescriptor);
+
+int make_connection_queue(int fileDescriptor);
+
+int make_bind(int fileDescriptor, struct sockaddr_in address);
+
+int accept_connection(int fileDescriptor, struct sockaddr_in address);
+
+struct string read_from_socket(int socket);
 
 #endif

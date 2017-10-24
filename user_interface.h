@@ -15,7 +15,6 @@ struct connection_params{
 struct string{
   char buffer[200];
   int number_bytes;
-  int is_end;
 };
 
 int readFromKeyboard(struct string * inData);

@@ -24,6 +24,18 @@ struct error parseResult(int result){
     else if(result == -102){
         strcpy(e.message, "Error al enviar informació");
     }
+    else if(result == -103){
+        strcpy(e.message, "Error al fer el bind");
+    }
+    else if(result == -104){
+        strcpy(e.message, "Error al crear la cua de connexions");
+    }
+    else if(result == -105){
+        strcpy(e.message, "Error no s'ha acceptat la connexió");
+    }
+    else if(result == -106){
+        strcpy(e.message, "Error No es pot llegir del socket");
+    }
     e.code = result;
     return e;
 }
