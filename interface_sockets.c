@@ -8,7 +8,9 @@
 int create_socket(int fd){
 	if((fd=socket(AF_INET,SOCK_STREAM,0))==-1)
 	{
-		return -100;
+		close(fd);
+		//return -100;
+		exit(-1);
 	}
 	return fd;
 }
@@ -33,7 +35,8 @@ int make_connection_queue(int fileDescriptor){
 	if((listen(fileDescriptor,3))==-1)
 	{
 		close(fileDescriptor);
-		return (-103);
+		//return (-103);
+		exit(-1);
 	}
 	return (0);
 }
@@ -41,9 +44,9 @@ int make_connection_queue(int fileDescriptor){
 int make_bind(int fileDescriptor, struct sockaddr_in address){
 	if((bind(fileDescriptor,(struct sockaddr*)&address,sizeof(address)))==-1)
 	{
-		perror("bind\n");
 		close(fileDescriptor);
-		return (-104);
+		//return (-104);
+		exit(-1);
 	}
 	return (0);
 }
@@ -62,7 +65,8 @@ int accept_connection(int fileDescriptor, struct sockaddr_in address){
 	if((socket=accept(fileDescriptor,(struct sockaddr*)&address, &long_adrrem))==-1)
 	{
 		close(fileDescriptor);
-		return (-105);
+		//return (-105);
+		exit(-1);
 	}
 	return socket;
 }
@@ -72,7 +76,8 @@ int make_connection(int fileDescriptor, struct sockaddr_in address){
 	if((connect(fileDescriptor,(struct sockaddr*)&address,sizeof(address)))==-1)
 	{
 		close(fileDescriptor);
-		return (-101);
+		//return (-101);
+		exit(-1);
 	}
 	return (0);
 }
@@ -82,7 +87,8 @@ int send_data(char data[], int number_bytes, int fileDescriptor){
 	if((bytes_escrits=write(fileDescriptor,data,number_bytes))==-1)
 	{
 		close(fileDescriptor);
-		return (-102);
+		//return (-102);
+		exit(-1);
 	}
 	return bytes_escrits;
 }
@@ -94,7 +100,8 @@ struct string read_from_socket(int socket){
 		if((data.number_bytes=read(socket, buffer,sizeof(buffer)))==-1)
 		{
 				close(socket);
-				data.number_bytes = -106;
+				//data.number_bytes = (-106);
+				exit(-1);
 		}
 		else{
 				data.number_bytes = strlen(buffer);
@@ -102,4 +109,26 @@ struct string read_from_socket(int socket){
 		    strncpy(data.buffer, buffer, strlen(buffer));
 		}
 		return data;
+}
+
+int write_screen(struct string data, int socket){
+	int bytes_escrits;
+	if((bytes_escrits=write(1,data.buffer,data.number_bytes))==-1)
+	{
+		perror("write\n");
+		close(socket);
+		exit(-1);
+	}
+	return bytes_escrits;
+}
+
+void show_connection_params(struct sockaddr_in adrrem, int scon){
+	int long_adrrem=sizeof(adrrem);
+	if (getpeername(scon, (struct sockaddr *)&adrrem, &long_adrrem) == -1)
+	{
+		perror("Error en getpeername");
+		close(scon);
+		exit(-1);
+	}
+	printf("Sock REM: @IP %s,TCP,#port %d\n",inet_ntoa(adrrem.sin_addr),ntohs(adrrem.sin_port));
 }

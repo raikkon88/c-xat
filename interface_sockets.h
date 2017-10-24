@@ -21,4 +21,8 @@ int accept_connection(int fileDescriptor, struct sockaddr_in address);
 
 struct string read_from_socket(int socket);
 
+int write_screen(struct string data, int socket);
+
+void show_connection_params(struct sockaddr_in adrrem, int scon);
+
 #endif

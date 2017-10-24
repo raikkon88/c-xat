@@ -31,33 +31,19 @@ int main(int argc,char *argv[])
 
 	adrloc = create_socket_struct(portloc, iploc);
 	/* Enllaça ip i port al socket */
-	printFunctionResult(make_bind(sesc, adrloc));
+	make_bind(sesc, adrloc);
 	/* Es crea una cua per emmagatzemar peticions de connexió pendents */
-	printFunctionResult(make_connection_queue(sesc));
-
+	make_connection_queue(sesc);
+	/* S'accepta la connexió */
 	scon = accept_connection(sesc, adrrem);
-	printFunctionResult(scon);
-	long_adrrem=sizeof(adrrem);
-
-	if (getpeername(scon, (struct sockaddr *)&adrrem, &long_adrrem) == -1)
- 	{
- 		perror("Error en getpeername");
- 		close(scon);
- 		exit(-1);
-	}
-	printf("Sock REM: @IP %s,TCP,#port %d\n",inet_ntoa(adrrem.sin_addr),ntohs(adrrem.sin_port));
-
-
+	/* Mostrem paràmetres del client */
+	show_connection_params(adrrem, scon);
+	
 	while(strcmp(data.buffer, "$")){
-		// Llegeix
+		/* Llegeix de socket */
 		data = read_from_socket(scon);
-		printFunctionResult(data.number_bytes);
-		if((bytes_escrits=write(1,data.buffer,data.number_bytes))==-1)
-		{
-			perror("write\n");
-			close(scon);
-			exit(-1);
-		}
+		/* Escriu per pantalla */
+		bytes_escrits = write_screen(data, scon);
 	}
 
 	/* Es tanquen els sockets scon (la connexió) i sesc */
