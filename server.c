@@ -21,6 +21,9 @@ int main(int argc,char *argv[])
 	char iploc[16];
 	int portloc;
 	struct string data;
+	
+	fd_set conjunt;               /* conjunt de descriptors de fitxer de lectura */ 
+	int descmax;
 
 	sesc = create_socket(sesc);
 	printFunctionResult(sesc);
