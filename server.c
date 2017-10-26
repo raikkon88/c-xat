@@ -31,7 +31,7 @@ int main(int argc,char *argv[])
 
 	/* L'adreca del socket del servidor (socket local) */
 	strcpy(iploc,"0.0.0.0"); /* 0.0.0.0 correspon a INADDR_ANY */
-	portloc = 3000;
+	portloc = 3001;
 
 	adrloc = create_socket_struct(portloc, iploc);
 	/* Enllaça ip i port al socket */
@@ -44,14 +44,16 @@ int main(int argc,char *argv[])
 	show_connection_params(adrrem, scon);
 	
 	
-	 /* Poden arribar dades via teclat o via scon: fem una llista de lectura amb els dos */ 
-	FD_ZERO(&conjunt);             /* esborrem el contingut de la llista */ 
-	FD_SET(TECLAT,&conjunt);       /* afegim (“marquem”) el teclat a la llista */ 
-	FD_SET(scon,&conjunt);         /* afegim (“marquem”) el socket connectat a la llista */ 
+	
 	descmax = scon; /* el número de descriptor màxim */ 
 	
 	
 	while(strcmp(data.buffer, "$")){
+		
+		 /* Poden arribar dades via teclat o via scon: fem una llista de lectura amb els dos */ 
+		FD_ZERO(&conjunt);             /* esborrem el contingut de la llista */ 
+		FD_SET(TECLAT,&conjunt);       /* afegim (“marquem”) el teclat a la llista */ 
+		FD_SET(scon,&conjunt);         /* afegim (“marquem”) el socket connectat a la llista */ 
 		/* Llegeix de socket */
 		//data = read_from_socket(scon);
 		/* Escriu per pantalla */
@@ -70,23 +72,33 @@ int main(int argc,char *argv[])
 		 /* arribat dades i que cal llegir (de fet, podrien ser dos si arriben dades als dos */ 
 		 if(FD_ISSET (TECLAT,&conjunt)) /* el teclat està “marcat”? han arribat dades al teclat? */ 
 		 { 
-			printf("teclat \n"); 
-		  //bytes_llegits = read(TECLAT,data.buffer,200); 
-		  data = read_from_socket(TECLAT);
-		  /* es llegeixen numbytes bytes (<=200) i es guarden en el vector buffer */ 
-		  //bytes_escrits = write_screen(data, 1);
-		  //FD_SET(TECLAT,&conjunt);
+			 readFromKeyboard(&data);
+			//fgets(data.buffer,200, stdin);
+			if (strcmp(data.buffer,"$\n") == 0) {
+				printf("rebut $ tancant la connexio\n"); 	
+				break;
+			}
+						
+			data.number_bytes=write(scon,data.buffer,strlen(data.buffer));  
+					
+			if(data.number_bytes<0)  {  
+				error("Error al escriure al socket");  
+			} 
+			else{
+				printf("Enviat\n");
+			}
 		 } 
 		 if(FD_ISSET (scon,&conjunt)) /* el socket scon està “marcat”? han arribat dades a scon? */ 
 		 { 
-			 printf("socket \n");
-		  data = read_from_socket(scon); 
-		  /* es llegeixen numbytes bytes (<=200) i es guarden en el vector buffer */ 
-		  //bytes_escrits = write_screen(data, 1);
-		  
-		  //FD_SET(scon,&conjunt);
+			
+			printf("missatge rebut: \n");
+			data = read_from_socket(scon);
+			
+			
+			 
+			printf("%s",data.buffer);
 		 } 
-		 printf("%s\n",data.buffer);
+		 
 	 
 	}
 	
