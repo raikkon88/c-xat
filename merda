@@ -1,0 +1,29 @@
+readFromKeyboard(&data);
+char nick_local[200];
+strncpy(nick_local, data.buffer, strlen(nick_local));
+
+/*
+data.number_bytes=write(scon,data.buffer,strlen(data.buffer));
+data = read_from_socket(scon);
+char nick_serv[200];
+strncpy(nick_serv, data.buffer, strlen(nick_serv));
+*/
+/* Poden arribar dades via teclat o via scon: fem una llista de lectura amb els dos */
+FD_ZERO(&conjunt);             /* esborrem el contingut de la llista */
+FD_SET(TECLAT,&conjunt);       /* afegim (“marquem”) el teclat a la llista */
+FD_SET(scon,&conjunt);         /* afegim (“marquem”) el socket connectat a la llista */
+
+printf("FEm el select\n");
+
+if(select(descmax+1, &conjunt, NULL, NULL, NULL) == -1){
+ perror("Error en select");
+ exit(-1);
+}
+
+printf("Esperant el nick del servidor\n");
+
+if(FD_ISSET (scon,&conjunt)) /* el socket scon està “marcat”? han arribat dades a scon? */
+{
+ data = read_from_socket(scon);
+ printf("El client %s s'ha connectat amb el servidor : %s\n", nick_local, data.buffer);
+}
