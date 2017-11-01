@@ -373,6 +373,7 @@ int HaArribatAlgunaCosa(const int *LlistaSck, int LongLlistaSck)
 	int j;
 	for(j = 0; j < LongLlistaSck; j++){
 		if(FD_ISSET(LlistaSck[j], &conjunt)){
+			printf("FD seleccionat : %i \n", LlistaSck[j]);
 			return LlistaSck[j];
 		}
 	}
