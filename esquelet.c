@@ -67,6 +67,7 @@ int main(int argc,char *argv[])
 	nSockets = 2;
 
 	int socketActiu;
+	printf("Quedem escoltant que arrivi alguna cosa.\n");
 	socketActiu=HaArribatAlgunaCosa(socketsEscoltant, nSockets);
 	EvalResult(socketActiu, socketsEscoltant, nSockets);
 
@@ -74,7 +75,7 @@ int main(int argc,char *argv[])
 	if(socketActiu == TECLAT){
 		socketActiu = TCP_CreaSockClient(ipLocal, port);
 
-		socketsEscoltant[1] = (int)socket;
+		socketsEscoltant[1] = (int)socketActiu;
 
 		EvalResult(socketActiu, socketsEscoltant, nSockets);
 		EvalResult(TCP_DemanaConnexio(socketActiu, ipRemota, port), socketsEscoltant, nSockets);
