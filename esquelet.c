@@ -81,6 +81,8 @@ int main(int argc,char *argv[])
 		printf("Ha creat un socket client i està demanant connexió : \n");
 		EvalResult(TCP_DemanaConnexio(socketActiu, ipRemota, port), socketsEscoltant, nSockets);
 		printf("Ha demanat la connexió : \n");
+
+		int bread = read(socketActiu, missatge,sizeof(missatge));
 	}
 	// Si el socket actiu no és un teclat fem un accept.
 	else {
