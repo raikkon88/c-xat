@@ -55,8 +55,9 @@ int main(int argc,char *argv[])
 	int portRemot;
 	int socketsEscoltant[2];
 	int nSockets = 1;
+	int nBytes;
 
-	char missatge[200];
+	char missatge[200]="";
 
 	/* Expressions, estructures de control, crides a funcions, etc.          */
 	int res = TCP_CreaSockServidor(ipLocal, port);
@@ -73,6 +74,11 @@ int main(int argc,char *argv[])
 	printf("HA arrivat per el socket : %i\n", socketActiu);
 	// Si el socket actiu és el teclat fem un socket i un connect.
 	if(socketActiu == TECLAT){
+
+
+		EvalResult(readFromKeyboard(ipRemota, nBytes), socketsEscoltant, nSockets);
+		printf("%s\n", ipRemota);
+
 		socketActiu = TCP_CreaSockClient(ipLocal, port);
 
 		socketsEscoltant[1] = (int)socketActiu;
@@ -82,7 +88,6 @@ int main(int argc,char *argv[])
 		EvalResult(TCP_DemanaConnexio(socketActiu, ipRemota, port), socketsEscoltant, nSockets);
 		printf("Ha demanat la connexió : \n");
 
-		int bread = read(socketActiu, missatge,sizeof(missatge));
 	}
 	// Si el socket actiu no és un teclat fem un accept.
 	else {
@@ -100,12 +105,14 @@ int main(int argc,char *argv[])
 		printf("Mirem si ha arrivat alguna cosa : \n");
 		socketActiu = HaArribatAlgunaCosa(socketsEscoltant, nSockets);
 		if(socketActiu == TECLAT){
-			printf("Ha arrivat per teclat : \n");
+			printf("Ha arrivat per teclat : %i\n",socketActiu);
+			EvalResult(readFromKeyboard(missatge, nBytes), socketsEscoltant, nSockets);
 			resultatAccio = TCP_Envia(socketActiu, missatge, strlen(missatge));
 		}
 		else{
-			printf("Ha arrivat per socket : \n");
+			printf("Ha arrivat per socket : %i\n", socketActiu);
 			resultatAccio = TCP_Rep(socketActiu, missatge, strlen(missatge));
+			printf("%s\n", missatge);
 		}
 		// Si hi ha qualsevol error es tencaran els sockets.
 		EvalResult(resultatAccio, socketsEscoltant, nSockets);
@@ -373,6 +380,7 @@ int HaArribatAlgunaCosa(const int *LlistaSck, int LongLlistaSck)
 	int j;
 	for(j = 0; j < LongLlistaSck; j++){
 		if(FD_ISSET(LlistaSck[j], &conjunt)){
+			printf("FD seleccionat : %i \n", LlistaSck[j]);
 			return LlistaSck[j];
 		}
 	}
@@ -391,7 +399,22 @@ void MostraError(const char *text)
 }
 
 
+int readFromKeyboard(char *buffer, int *number_bytes){
+	char in[200]="";
+	int bReaded;
+  /* S'envia pel socket connectat scon el que es rep pel teclat */
+	if((bReaded=read(0, in,sizeof(in)))==-1)
+	{
+    return (-1);
+	}
+  else{
 
+    number_bytes = (int *)strlen(in) - 1;
+    memset(buffer, '\0', sizeof(in));
+    strncpy(buffer, in, strlen(in) - 1);
+  }
+  return bReaded;
+}
 
 
 /* Si ho creieu convenient, feu altres funcions...                        */
