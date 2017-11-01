@@ -70,7 +70,7 @@ int main(int argc,char *argv[])
 	printf("Quedem escoltant que arrivi alguna cosa.\n");
 	socketActiu=HaArribatAlgunaCosa(socketsEscoltant, nSockets);
 	EvalResult(socketActiu, socketsEscoltant, nSockets);
-
+	printf("HA arrivat per el socket : %i\n", socketActiu);
 	// Si el socket actiu és el teclat fem un socket i un connect.
 	if(socketActiu == TECLAT){
 		socketActiu = TCP_CreaSockClient(ipLocal, port);
@@ -78,13 +78,15 @@ int main(int argc,char *argv[])
 		socketsEscoltant[1] = (int)socketActiu;
 
 		EvalResult(socketActiu, socketsEscoltant, nSockets);
+		printf("Ha creat un socket client i està demanant connexió : \n");
 		EvalResult(TCP_DemanaConnexio(socketActiu, ipRemota, port), socketsEscoltant, nSockets);
-
+		printf("Ha demanat la connexió : \n");
 	}
 	// Si el socket actiu no és un teclat fem un accept.
 	else {
 		// Ja tinc les dades del que està en remot i el port per el que em puc comunicar amb ell.
 		socketActiu = TCP_AcceptaConnexio(socketActiu, ipRemota, & portRemot);
+		printf("Ha acceptat connexió : \n");
 		EvalResult(socketActiu, socketsEscoltant, nSockets);
 		socketsEscoltant[1] = socketActiu;
 	}
