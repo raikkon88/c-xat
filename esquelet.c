@@ -92,12 +92,17 @@ int main(int argc,char *argv[])
 	}
 
 	int resultatAccio = 1;
-	while(resultatAccio != 0 && !strcmp(missatge, "$")){
+
+	printf("Missatge abans del bucle : %s\n", missatge);
+	while(resultatAccio != 0 && strcmp(missatge, "$")!=0){
+		printf("Mirem si ha arrivat alguna cosa : \n");
 		socketActiu = HaArribatAlgunaCosa(socketsEscoltant, nSockets);
 		if(socketActiu == TECLAT){
+			printf("Ha arrivat per teclat : \n");
 			resultatAccio = TCP_Envia(socketActiu, missatge, strlen(missatge));
 		}
 		else{
+			printf("Ha arrivat per socket : \n");
 			resultatAccio = TCP_Rep(socketActiu, missatge, strlen(missatge));
 		}
 		// Si hi ha qualsevol error es tencaran els sockets.
