@@ -68,10 +68,10 @@ int main(int argc,char *argv[])
 	nSockets = 2;
 
 	int socketActiu;
-	printf("Quedem escoltant que arrivi alguna cosa.\n");
+	//printf("Quedem escoltant que arrivi alguna cosa.\n");
 	socketActiu=HaArribatAlgunaCosa(socketsEscoltant, nSockets);
 	EvalResult(socketActiu, socketsEscoltant, nSockets);
-	printf("HA arrivat per el socket : %i\n", socketActiu);
+	//printf("HA arrivat per el socket : %i\n", socketActiu);
 	// Si el socket actiu és el teclat fem un socket i un connect.
 	if(socketActiu == TECLAT){
 
@@ -84,33 +84,33 @@ int main(int argc,char *argv[])
 		socketsEscoltant[1] = (int)socketActiu;
 
 		EvalResult(socketActiu, socketsEscoltant, nSockets);
-		printf("Ha creat un socket client i està demanant connexió : \n");
+		//printf("Ha creat un socket client i està demanant connexió : \n");
 		EvalResult(TCP_DemanaConnexio(socketActiu, ipRemota, port), socketsEscoltant, nSockets);
-		printf("Ha demanat la connexió : \n");
+		printf("Ha demanat la connexió \n");
 
 	}
 	// Si el socket actiu no és un teclat fem un accept.
 	else {
 		// Ja tinc les dades del que està en remot i el port per el que em puc comunicar amb ell.
 		socketActiu = TCP_AcceptaConnexio(socketActiu, ipRemota, & portRemot);
-		printf("Ha acceptat connexió : \n");
+		printf("Ha acceptat connexió \n");
 		EvalResult(socketActiu, socketsEscoltant, nSockets);
 		socketsEscoltant[1] = socketActiu;
 	}
 
 	int resultatAccio = 1;
 
-	printf("Missatge abans del bucle : %s\n", missatge);
+	//printf("Missatge abans del bucle : %s\n", missatge);
 	while(resultatAccio != 0 && strcmp(missatge, "$")!=0){
-		printf("Mirem si ha arrivat alguna cosa : \n");
+		//printf("Mirem si ha arrivat alguna cosa : \n");
 		socketActiu = HaArribatAlgunaCosa(socketsEscoltant, nSockets);
 		if(socketActiu == TECLAT){
-			printf("Ha arrivat per teclat : %i\n",socketActiu);
+			//printf("Ha arrivat per teclat : %i\n",socketActiu);
 			EvalResult(readFromKeyboard(missatge, nBytes), socketsEscoltant, nSockets);
-			resultatAccio = TCP_Envia(socketActiu, missatge, strlen(missatge));
+			resultatAccio = TCP_Envia(socketsEscoltant[1], missatge, strlen(missatge));
 		}
 		else{
-			printf("Ha arrivat per socket : %i\n", socketActiu);
+			//printf("Ha arrivat per socket : %i\n", socketActiu);
 			resultatAccio = TCP_Rep(socketActiu, missatge, strlen(missatge));
 			printf("%s\n", missatge);
 		}
@@ -272,6 +272,8 @@ int TCP_AcceptaConnexio(int Sck, char *IPrem, int *portTCPrem)
 /* Retorna -1 si hi ha error; el nombre de bytes enviats si tot va bé.    */
 int TCP_Envia(int Sck, const char *SeqBytes, int LongSeqBytes)
 {
+	printf("%s -> dins de tcp_envia per el socket %i el nombre de bytes %i\n", SeqBytes, Sck, LongSeqBytes);
+
 	return write(Sck,SeqBytes,strlen(SeqBytes));
 }
 
@@ -412,6 +414,8 @@ int readFromKeyboard(char *buffer, int *number_bytes){
     number_bytes = (int *)strlen(in) - 1;
     memset(buffer, '\0', sizeof(in));
     strncpy(buffer, in, strlen(in) - 1);
+		printf("Nombre de bytes strlen -> %i \n", strlen(in) - 1);
+		printf("Nombre de bytes bReaded -> %i \n", bReaded);
   }
   return bReaded;
 }
