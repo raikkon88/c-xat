@@ -126,7 +126,8 @@ int main(int argc,char *argv[])
 		}
 		else{
 			resultatAccio = TCP_Rep(socketActiu, missatge.buffer, strlen(missatge.buffer));
-			printf("%s\n", missatge.buffer);
+			if(resultatAccio != 0)
+				printf("%s\n", missatge.buffer);
 		}
 		// Si hi ha qualsevol error es tencaran els sockets.
 		EvalResult(resultatAccio, socketsEscoltant, nSockets);
