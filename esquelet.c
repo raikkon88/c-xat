@@ -128,13 +128,10 @@ int main(int argc,char *argv[])
 		bzero(missatge, 200);
 		socketActiu = HaArribatAlgunaCosa(socketsEscoltant, nSockets);
 		if(socketActiu == TECLAT){
-			readFromKeyboard(&missatge);
-			//if(strcmp(missatge.buffer, "$")!=1) break;
-			if(strcmp(missatge,"$")!=1) break;
-
-			//sprintf(missatge.buffer, "%s%.3d%s", missatge.tipus, missatge.number_bytes, missatge.buffer);
-			//resultatAccio = TCP_Envia(socketsEscoltant[1], missatge.buffer, strlen(missatge.buffer));
-			resultatAccio = TCP_Envia(socketsEscoltant[1], missatge, strlen(missatge));
+			EvalResult(readFromKeyboard(missatge, MAX_BUFFER), socketsEscoltant, nSockets);
+			if(strcmp(missatge,"$")!=1) break;int
+			resultatAccio = envia_linia(socketsEscoltant[1], missatge);
+			//resultatAccio = TCP_Envia(socketsEscoltant[1], missatge, strlen(missatge));
 		}
 		else{
 			//resultatAccio = TCP_Rep(socketActiu, missatge.buffer, strlen(missatge.buffer));
@@ -317,7 +314,7 @@ int TCP_AcceptaConnexio(int Sck, char *IPrem, int *portTCPrem)
 /* Retorna -1 si hi ha error; el nombre de bytes enviats si tot va bé.    */
 int TCP_Envia(int Sck, const char *SeqBytes, int LongSeqBytes)
 {
-	printf("%s -> dins de tcp_envia per el socket %i el nombre de bytes %i\n", SeqBytes, Sck, LongSeqBytes);
+	//printf("%s -> dins de tcp_envia per el socket %i el nombre de bytes %i\n", SeqBytes, Sck, LongSeqBytes);
 
 	return write(Sck,SeqBytes,strlen(SeqBytes));
 }
@@ -461,6 +458,18 @@ int readFromKeyboard(char * inData, int numberBytesToRead){
 int getNickname(char * nickname){
 	printf("%s\n", "Entra el teu nickname : ");
 	return readFromKeyboard(nickname, MAX_BUFFER);
+}
+
+int envia_linia(int sck, const char * missatge){
+	char linia[MAX_LINE];
+	sprintf(linia, "%s%.3d%s", "L", strlen(missatge), missatge);
+	return TCP_Envia(sck, linia, strlen(linia));
+}
+
+int envia_nickname(int sck, const char * nickname){
+	char linia[MAX_LINE];
+	sprintf(linia, "%s%.3d%s", "N", strlen(nickname), nickname);
+	return TCP_Envia(sck, linia, strlen(linia));
 }
 
 int getIPAddress(char * ip){
