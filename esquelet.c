@@ -135,7 +135,7 @@ int main(int argc,char *argv[])
 		}
 		else{
 			//resultatAccio = TCP_Rep(socketActiu, missatge.buffer, strlen(missatge.buffer));
-			resultatAccio = TCP_Rep(socketActiu, missatge, strlen(missatge));
+			resultatAccio = TCP_Rep(socketActiu, missatge, MAX_LINE);
 			if(resultatAccio != 0)
 				//printf("%s\n", missatge.buffer);
 				printf("%s\n", missatge);
@@ -331,7 +331,7 @@ int TCP_Envia(int Sck, const char *SeqBytes, int LongSeqBytes)
 /* bytes rebuts si tot va bé.                                             */
 int TCP_Rep(int Sck, char *SeqBytes, int LongSeqBytes)
 {
-	return read(Sck, SeqBytes,sizeof(SeqBytes));
+	return read(Sck, SeqBytes, LongSeqBytes);
 }
 
 
