@@ -77,14 +77,14 @@ int main(int argc,char *argv[])
 	port = getPort();
 	// LLegim el nickname
 	EvalResult(getNickname(nickname), NULL, 0);
-
-	printf("Benvingut %s , has configurat el port %i\n", nickname, port);
 	// Generem una escolta com a servidor
-	EvalResult(res, socketsEscoltant, nSockets);
+	//EvalResult(res, socketsEscoltant, nSockets);
+
 
 	// Establim els sockets que escoltarem de moment.
 	socketsEscoltant[0] = TECLAT;
 	socketsEscoltant[1] = TCP_CreaSockServidor(ipLocal, port);
+	printf("Benvingut %s , has configurat el port %i\n", nickname, port);
 	EvalResult(socketsEscoltant[1], socketsEscoltant, nSockets);
 	nSockets = 2;
 
@@ -97,7 +97,10 @@ int main(int argc,char *argv[])
 	// Si el socket actiu és el teclat fem un socket i un connect.
 	if(socketActiu == TECLAT){
 
-		readFromKeyboard(&ipRemota);
+		//readFromKeyboard(ipRemota);
+		int ipLong = getIPAddress(ipRemota);
+		printf("%s\n", ipRemota);
+		EvalResult(ipLong, socketsEscoltant, nSockets);
 		//printf("%s\n", ipRemota.buffer);
 		printf("%s\n", ipRemota);
 		socketActiu = TCP_CreaSockClient(ipLocal, port);
@@ -142,7 +145,6 @@ int main(int argc,char *argv[])
 		}
 		// Si hi ha qualsevol error es tencaran els sockets.
 		EvalResult(resultatAccio, socketsEscoltant, nSockets);
-		socketActiu = HaArribatAlgunaCosa(socketsEscoltant, nSockets);
 	}
 
 	int i;
@@ -214,6 +216,8 @@ int TCP_CreaSockClient(const char *IPloc, int portTCPloc)
 
 int TCP_CreaSockServidor(const char *IPloc, int portTCPloc)
 {
+	printf("Anem a configurar %s al port %i\n", IPloc, portTCPloc);
+
 	int fd;
 	if((fd=socket(AF_INET,SOCK_STREAM,0))==-1)
 	{
@@ -460,7 +464,6 @@ int getNickname(char * nickname){
 }
 
 int getIPAddress(char * ip){
-	printf("%s\n", "Entra la IP a la que et vols connectar : ");
 	return readFromKeyboard(ip, MAX_IP);
 }
 
