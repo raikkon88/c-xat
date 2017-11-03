@@ -2,48 +2,48 @@
 
 > Autors : Feng Lin i Marc Sànchez
 
-## Client 
+## Client
 
-### Crides 
+### Crides
 
-#### getSockName() -> Per saber la l'adreça del servidor o del client després de fer la connexió. 
+#### getSockName() -> Per saber la l'adreça del servidor o del client després de fer la connexió.
 
-#### socket 
+#### socket
 
 Crea un socket
 
-- Primer paràmetre -> AF_INET és una constant que assigna l'arquitectura d'internet. 
+- Primer paràmetre -> AF_INET és una constant que assigna l'arquitectura d'internet.
 - Segon paràmetre -> SOCK_STREAM és un protocol que defineix TCP, en cas que sigui UDO seria SOCK_DATA, es defineix una part de paquet.
 
-#### Bind 
+#### Bind
 
-Al client actualment no cal fer un bind, peró es pot fer, el que passa és que si no es fa el sistema operatiu assigna un port lliure. 
+Al client actualment no cal fer un bind, peró es pot fer, el que passa és que si no es fa el sistema operatiu assigna un port lliure.
 
 #### connect
 
-El primer argument és el descriptor del socket i els segon argument és l'estructura per referència de on s'ha de connectar el servidor. 
+El primer argument és el descriptor del socket i els segon argument és l'estructura per referència de on s'ha de connectar el servidor.
 
 ## Servidor
 
-### Crides 
+### Crides
 
-#### bind 
+#### bind
 
-Assigna una ip i un port a un descriptor de un socket. 
+Assigna una ip i un port a un descriptor de un socket.
 
-#### Listen 
+#### Listen
 
-Crea una cua de peticions de connexió. La cua sol ser sense límit. 
+Crea una cua de peticions de connexió. La cua sol ser sense límit.
 
-#### accept 
+#### accept
 
-Desencua una petició de connexió, reb el descriptor del socket, l'estructura de dades del client per que l'empleni i la longitud de l'estructura. 
+Desencua una petició de connexió, reb el descriptor del socket, l'estructura de dades del client per que l'empleni i la longitud de l'estructura.
 
-Un cop s'ha fet l'accept es retorna un descriptor del socket on ha quedat connectat el client i el servidor, en aquest moment s'ha de parlar directament per aquest scon. 
+Un cop s'ha fet l'accept es retorna un descriptor del socket on ha quedat connectat el client i el servidor, en aquest moment s'ha de parlar directament per aquest scon.
 
 #### select
 
-Serveix per manterin una conversa. Un cop tots han fet les crides de connexio els dos fan un select(teclat, socket). Llavors si arriva una lína per teclat es fa un llegir enviar i si arriva per el socket es fa un llegir i mostrar per pantalla. 
+Serveix per manterin una conversa. Un cop tots han fet les crides de connexio els dos fan un select(teclat, socket). Llavors si arriva una lína per teclat es fa un llegir enviar i si arriva per el socket es fa un llegir i mostrar per pantalla.
 
 PAS 2
 ======
@@ -57,19 +57,19 @@ HaArrivatAlgunaCosa -> select
 PAS 3
 =======
 
-S'ha de fer que amb el select escolti 3 possibles casos, una connexió tcp, una string d'un socket connectat o el teclat. 
+S'ha de fer que amb el select escolti 3 possibles casos, una connexió tcp, una string d'un socket connectat o el teclat.
 
-El codi farà un socket, un bind i un listen i un select. 
+El codi farà un socket, un bind i un listen i un select.
 
-Quan surt del select s'ha de saber què ha passat, per saber-ho hem de mirar què ha arrivat. Si entra un socket farem un accept, en canvi si ve de teclat farem un socket i un connect. 
+Quan surt del select s'ha de saber què ha passat, per saber-ho hem de mirar què ha arrivat. Si entra un socket farem un accept, en canvi si ve de teclat farem un socket i un connect.
 
-Tot seguit es fa el while amb un select. 
+Tot seguit es fa el while amb un select.
 
-### PROTOCOL : 
+### PROTOCOL :
 
-La idea és que els missatges tinguin un significat i que els camps possibles que s'envien siguin estandaritzats amb tots els programes. 
+La idea és que els missatges tinguin un significat i que els camps possibles que s'envien siguin estandaritzats amb tots els programes.
 
-Donats 2 processos, P1 i P2. 
+Donats 2 processos, P1 i P2.
 
 #### 1 - Com P1 li diu a P2 que vol iniciar la conversa?
 
@@ -77,34 +77,50 @@ P1 fa connect i P2 fa un accept per tant p1 fa Petició inici de connexió i P2 
 
 #### 2 - Com P1 li diu a P2 que vol acabar?
 
-La idea és fer una desconnexió : A nivell de transport P1 li enviarà una petició de fi de connexió i P2 enviarà resposta de petició. 
+La idea és fer una desconnexió : A nivell de transport P1 li enviarà una petició de fi de connexió i P2 enviarà resposta de petició.
 
-Es fa un close de un socket TCP, llavors s'envien els missatges que s'han comentat a la línia anterior. llavors quan es fa el read retorna un 0. 
+Es fa un close de un socket TCP, llavors s'envien els missatges que s'han comentat a la línia anterior. llavors quan es fa el read retorna un 0.
 
-La interfície usuari aplicació li és igual com es tenca el programa per que el missatge final no té importància de com es tenca. 
+La interfície usuari aplicació li és igual com es tenca el programa per que el missatge final no té importància de com es tenca.
 
-#### 3 - Nicknames 
+#### 3 - Nicknames
 
-Es construeixen missatges amb 3 camps : 
+Es construeixen missatges amb 3 camps :
 
 - Tipus -> (L,N) de línia o nickname
 - Longitud -> 3bytes
-- Informació -> El contingut del nickname o les línies. 
+- Informació -> El contingut del nickname o les línies.
 
 #### 4 - Línies
 
-No tenen ni \n ni \0. 
+No tenen ni \n ni \0.
 
-Quan arriven les línies es poden processar com un string o llegint byte a byte. 
+Quan arriven les línies es poden processar com un string o llegint byte a byte.
 
 
-#### Eines! 
+#### Eines!
 
-- sprintf() -> Enlloc de imprimir per pantalla ho imprimeix en un string. 
+- sprintf() -> Enlloc de imprimir per pantalla ho imprimeix en un string.
 
 	char miss[100];
-	sprintf(miss, "%s%.3d%s", tipus, longitud, informacio); 
-	
+	sprintf(miss, "%s%.3d%s", tipus, longitud, informacio);
+
 El resultat serà amb \0 peró s'ha de treure. El %.3d formatarà el tipus amb 3 bytes. 4 -> 004
 
-- strlen("hola\0") -> retorna 4 i s'han ocupat 5 bytes. 
+- strlen("hola\0") -> retorna 4 i s'han ocupat 5 bytes.
+
+## Sessió 5
+
+S'ha de fer un bind a la creació de socket client, si no es fa bind és fer un bind a ip 0.0.0.0 i al port 0.
+Si algú no vol fer bind el que s'ha de fer és un bind a la ip 0.0.0.0 i el port 0.
+
+Els strings sempre han de tenir un \0 al final per poder-se utilitzar amb les funcions pròpies dels strings.
+
+S'ha de tenir clar que el protocol tindrà 204 bytes ja que serien 203 amb el char i els 3 bytes del número i un \0 al final.
+
+sscanf() -> mirar
+strncpy() -> Copia n bytes d'un string
+
+Per fer aquesta setmana :
+
+-

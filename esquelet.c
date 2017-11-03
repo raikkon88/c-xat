@@ -1,9 +1,9 @@
 /**************************************************************************/
 /*                                                                        */
 /* P1 - MI amb sockets TCP/IP - Part I                                    */
-/* Versio numero N                                                        */
+/* Versio numero 1                                                        */
 /*                                                                        */
-/* Autors: X, Y                                                           */
+/* Autors: Feng Lin i Marc Sánchez                                        */
 /*                                                                        */
 /**************************************************************************/
 
@@ -21,9 +21,15 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-#define TECLAT 0
-
 /* Definició de constants, p.e., #define MAX_LINIA 150                    */
+#define TECLAT 				0
+
+/* Definició de màxims de longitud dels diferents tipus d'string */
+#define MAX_BUFFER 		200
+#define MAX_TYPE 			2
+#define MAX_IP 				16
+#define MAX_LINE			204
+#define MAX_PORT			5
 
 /* Declaració de funcions (les seves definicions es troben més avall) per */
 /* així fer-les conegudes des d'aqui fins al final de fitxer.             */
@@ -41,47 +47,50 @@ int HaArribatAlgunaCosa(const int *LlistaSck, int LongLlistaSck);
 void MostraError(const char *text);
 void EvalResult(int res, const int *sockets, int nSockets);
 
-
-struct string{
-	char tipus[1]; // [N,L]
-  char buffer[200];
-  int number_bytes;
-};
+/**************************************************************************/
+/*                                                                        */
+/* Struct String
+/* Versio numero 1                                                        */
+/*                                                                        */
+/* Autors: Marc Sánchez i Feng Lin                                        */
+/*                                                                        */
+/**************************************************************************/
 
 int main(int argc,char *argv[])
 {
-
-	/* Declaració de variables, p.e., int n;                                 */
 	// CONSTANTS que es poden cambiar.
-	char ipLocal[16] = "0.0.0.0";
-	struct string ipRemota;
+	char ipLocal[MAX_IP] = "0.0.0.0";
 
-	bzero(ipRemota.buffer, 200);
-	ipRemota.number_bytes=0;
-	//char ipRemota[16] = "192.168.1.115";
-	int port = 3000;
+	// Creem les linies de dades del protocol.
+	char ipRemota[MAX_IP];      // Ip on es connectarà tant per la connexió de servidor com la de client.
+	char nickname[MAX_BUFFER];  // Nickname de l'usuari.
+	char missatge[MAX_LINE];	  // Nickname de l'usuari.
+
+	int port = 3000; // Valor per defecte.
 	int portRemot;
 	int socketsEscoltant[2];
 	int nSockets = 1;
 	int nBytes;
+	int res;
 
-	struct string missatge;
-	strncpy(missatge.tipus, "L", 1);
-	bzero(missatge.buffer, 200);
-	missatge.number_bytes=0;
+	// LLegim el port
+	port = getPort();
+	// LLegim el nickname
+	EvalResult(getNickname(nickname), NULL, 0);
 
-	//char missatge[200]="";
-
-	/* Expressions, estructures de control, crides a funcions, etc.          */
-	int res = TCP_CreaSockServidor(ipLocal, port);
+	printf("Benvingut %s , has configurat el port %i\n", nickname, port);
+	// Generem una escolta com a servidor
 	EvalResult(res, socketsEscoltant, nSockets);
 
+	// Establim els sockets que escoltarem de moment.
 	socketsEscoltant[0] = TECLAT;
-	socketsEscoltant[1] = res;
+	socketsEscoltant[1] = TCP_CreaSockServidor(ipLocal, port);
+	EvalResult(socketsEscoltant[1], socketsEscoltant, nSockets);
 	nSockets = 2;
 
 	int socketActiu;
 	//printf("Quedem escoltant que arrivi alguna cosa.\n");
+	printf("Escriu la Ip de on et vols connectar o espera't que es connectin amb tu.\n");
 	socketActiu=HaArribatAlgunaCosa(socketsEscoltant, nSockets);
 	EvalResult(socketActiu, socketsEscoltant, nSockets);
 	//printf("HA arrivat per el socket : %i\n", socketActiu);
@@ -89,48 +98,51 @@ int main(int argc,char *argv[])
 	if(socketActiu == TECLAT){
 
 		readFromKeyboard(&ipRemota);
-		printf("%s\n", ipRemota.buffer);
-
+		//printf("%s\n", ipRemota.buffer);
+		printf("%s\n", ipRemota);
 		socketActiu = TCP_CreaSockClient(ipLocal, port);
 		socketsEscoltant[1] = (int)socketActiu;
 		EvalResult(socketActiu, socketsEscoltant, nSockets);
 		//printf("Ha creat un socket client i està demanant connexió : \n");
-		EvalResult(TCP_DemanaConnexio(socketActiu, ipRemota.buffer, port), socketsEscoltant, nSockets);
+		//EvalResult(TCP_DemanaConnexio(socketActiu, ipRemota.buffer, port), socketsEscoltant, nSockets);
+		EvalResult(TCP_DemanaConnexio(socketActiu, ipRemota, port), socketsEscoltant, nSockets);
 		printf("Ha demanat la connexió \n");
 
 	}
 	// Si el socket actiu no és un teclat fem un accept.
 	else {
 		// Ja tinc les dades del que està en remot i el port per el que em puc comunicar amb ell.
-		socketActiu = TCP_AcceptaConnexio(socketActiu, ipRemota.buffer, & portRemot);
+		//socketActiu = TCP_AcceptaConnexio(socketActiu, ipRemota.buffer, & portRemot);
+		socketActiu = TCP_AcceptaConnexio(socketActiu, ipRemota, & portRemot);
 		printf("Ha acceptat connexió \n");
 		EvalResult(socketActiu, socketsEscoltant, nSockets);
 		socketsEscoltant[1] = socketActiu;
 	}
-
-
-	int resultatAccio = 1;
+	int resultatAccio = TCP_Envia(socketsEscoltant[1], nickname, strlen(nickname));
 
 	//printf("Missatge abans del bucle : %s\n", missatge);
 	while(resultatAccio != 0){
-		bzero(missatge.buffer, 200);
-		printf("missatge després de bzero : %s\n",missatge.buffer);
-		//printf("Mirem si ha arrivat alguna cosa : \n");
+		bzero(missatge, 200);
 		socketActiu = HaArribatAlgunaCosa(socketsEscoltant, nSockets);
 		if(socketActiu == TECLAT){
 			readFromKeyboard(&missatge);
-			if(strcmp(missatge.buffer, "$")!=1) break;
+			//if(strcmp(missatge.buffer, "$")!=1) break;
+			if(strcmp(missatge,"$")!=1) break;
 
 			//sprintf(missatge.buffer, "%s%.3d%s", missatge.tipus, missatge.number_bytes, missatge.buffer);
-			resultatAccio = TCP_Envia(socketsEscoltant[1], missatge.buffer, strlen(missatge.buffer));
+			//resultatAccio = TCP_Envia(socketsEscoltant[1], missatge.buffer, strlen(missatge.buffer));
+			resultatAccio = TCP_Envia(socketsEscoltant[1], missatge, strlen(missatge));
 		}
 		else{
-			resultatAccio = TCP_Rep(socketActiu, missatge.buffer, strlen(missatge.buffer));
+			//resultatAccio = TCP_Rep(socketActiu, missatge.buffer, strlen(missatge.buffer));
+			resultatAccio = TCP_Rep(socketActiu, missatge, strlen(missatge));
 			if(resultatAccio != 0)
-				printf("%s\n", missatge.buffer);
+				//printf("%s\n", missatge.buffer);
+				printf("%s\n", missatge);
 		}
 		// Si hi ha qualsevol error es tencaran els sockets.
 		EvalResult(resultatAccio, socketsEscoltant, nSockets);
+		socketActiu = HaArribatAlgunaCosa(socketsEscoltant, nSockets);
 	}
 
 	int i;
@@ -142,11 +154,19 @@ int main(int argc,char *argv[])
 	return (0);
 }
 
+/**
+ * Evalua res, si és negatiu tenca els sockets i acaba l'apliacació, altrament no fa res.
+ * - res : és el resultat que s'ha d'evaluar
+ * - sockets : son tots els sockets que l'aplicació té oberts
+ * - nSockets : és el nombre de sockets que l'aplicació té oberts
+ * En cas que hagi tencat l'aplicació haurà mostrat per pantalla l'error que s'ha produït.
+ */
 
 void EvalResult(int res, const int *sockets, int nSockets){
 	if(res < 0){
 		int i = 0;
-		while(i<nSockets){
+		// Faltaria buidar el buffer del TECLAT que sempre el poso a la posició 0 de sockets.
+		while(sockets != NULL && i<nSockets){
 				close(sockets[i]);
 				i++;
 		}
@@ -421,42 +441,39 @@ void MostraError(const char *text)
  	fprintf(stderr, "%s: %s\n", text, strerror(errno));
 }
 
-int readFromKeyboard(struct string * inData){
-  int bytes_llegits;
-  char buffer[200] = "";
-  /* S'envia pel socket connectat scon el que es rep pel teclat */
-	if((bytes_llegits=read(0, buffer,sizeof(buffer)))==-1)
-	{
-    inData->number_bytes = -3;
-	}
-  else{
-    inData->number_bytes = strlen(buffer) - 1;
-    memset(inData->buffer, '\0', sizeof(buffer));
-    strncpy(inData->buffer, buffer, strlen(buffer) - 1);
-  }
-  return bytes_llegits;
-}
-
-/*
-struct string readFromKeyboard(char *buffer, int *number_bytes){
-
-	char in[200]="";
-	int bReaded;
-
-	if((bReaded=read(0, in,sizeof(in)))==-1)
+int readFromKeyboard(char * inData, int numberBytesToRead){
+	int bytes_llegits;
+	if((bytes_llegits=read(0, inData, numberBytesToRead))==-1)
 	{
     return (-1);
 	}
-  else{
+	printf("%i\n", bytes_llegits);
+	inData[bytes_llegits-1] = '\0';
+	printf("%s\n",inData);
 
-    number_bytes = (int *)strlen(in) - 1;
-    memset(buffer, '\0', sizeof(in));
-    strncpy(buffer, in, strlen(in) - 1);
-		printf("Nombre de bytes strlen -> %i \n", strlen(in) - 1);
-		printf("Nombre de bytes bReaded -> %i \n", bReaded);
-  }
-  return bReaded;
+  return bytes_llegits;
 }
-*/
+
+int getNickname(char * nickname){
+	printf("%s\n", "Entra el teu nickname : ");
+	return readFromKeyboard(nickname, MAX_BUFFER);
+}
+
+int getIPAddress(char * ip){
+	printf("%s\n", "Entra la IP a la que et vols connectar : ");
+	return readFromKeyboard(ip, MAX_IP);
+}
+
+int getPort(){
+	char port[MAX_BUFFER];
+	bzero(port, '\0');
+	printf("%s\n", "Entra el número de port que ha de fer servir el programa \nHa de ser un enter positiu entre 0 i 65000 : ");
+	int res = readFromKeyboard(port, MAX_PORT);
+	printf("Has entrat el port %s\n",port);
+	EvalResult(res, NULL, 0); // Indiquem que no hi ha sockets amb un 0 i així no petarà.
+	int portNumber;
+	EvalResult(portNumber = atoi(port), NULL, 0); // indiquem que no hi ha sockets amb un 0 i així no petarà.
+	return portNumber;
+}
 
 /* Si ho creieu convenient, feu altres funcions...                        */
