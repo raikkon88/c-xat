@@ -23,6 +23,7 @@
 
 /* Definició de constants, p.e., #define MAX_LINIA 150                    */
 #define ALL_INTERFACES 			"0.0.0.0"
+#define MAX_LINE			304
 
 /* Declaració de funcions internes que es fan servir en aquest fitxer     */
 /* (les seves definicions es troben més avall) per així fer-les conegudes */
@@ -102,17 +103,18 @@ int MI_DemanaConv(const char *IPrem, int portTCPrem, char *IPloc, int *portTCPlo
 	TCP_TrobaAdrSockLoc(sck,IPloc,portTCPloc);
 
 	// enviar i rebre nicknames falta fer... prob fallara
-	char nick[304];
+	char nick[MAX_LINE];
 	//linia 469 esquelet.c
 	sprintf(nick, "%s%.3d%s", "N", strlen(NicLoc), NicLoc);
+    printf("%s\n",nick);
 	//envia nicklocal al server
 	int nbyteNick = TCP_Envia(sck, nick, strlen(nick));
 	// if nbyteNick == ... return ...
 
-	char nickopponent[304];
+	char nickopponent[MAX_LINE];
 
 	// linia 137 esquelet.c
-	int resultatAccio= TCP_Rep(sck, nickopponent, 304);
+	int resultatAccio= TCP_Rep(sck, nickopponent, MAX_LINE);
 	//if resultatAccio ==... return ....
 	// NicRem= ~~~ no se si guarda de forma N,Strlen,Nic o nomes Nic
 
@@ -152,10 +154,10 @@ int MI_AcceptaConv(int SckEscMI, char *IPrem, int *portTCPrem, char *IPloc, int 
 	// rebre i envia nicknames falta fer...
 
 
-	char nickopponent[304];
+	char nickopponent[MAX_LINE];
 
 	// linia 137 esquelet.c
-	int resultatAccio= TCP_Rep(socketActiu, nickopponent, 304);
+	int resultatAccio= TCP_Rep(socketActiu, nickopponent, MAX_LINE);
     if(resultatAccio <=0){
         return -1;
     }
@@ -164,12 +166,12 @@ int MI_AcceptaConv(int SckEscMI, char *IPrem, int *portTCPrem, char *IPloc, int 
     int bytes;
     char nickNet[300];
 
-    resultatAccio = MI_DesmontarProtocol(nickopponent, &nickNet, &tipus, &bytes);
+    resultatAccio = MI_DesmontarProtocol(nickopponent, &nickNet, &tipus, resultatAccio);
     if(resultatAccio < 0){
         return resultatAccio;
     }
     if(tipus == 'L'){
-        return -3;
+        return -1;
     }
 
     // Ja s'ha rebut el nick de l'altre.
@@ -178,7 +180,7 @@ int MI_AcceptaConv(int SckEscMI, char *IPrem, int *portTCPrem, char *IPloc, int 
 	//if resultatAccio ==... return ....
 	// NicRem= ~~~ no se si guarda de forma N,Strlen,Nic o nomes Nic
 
-	//char nick[304];
+	//char nick[MAX_LINE];
 	//linia 469 esquelet.c
 
 	// envia nicklocal al server
@@ -196,7 +198,7 @@ int MI_DesmontarProtocol(char * toParse, char * data, char * tipus, int * bytes)
 
     char nombreBytes[3];
     int i;
-    for(i = 0; i < strlen(toParse); i++){
+    for(i = 0; i < (int) bytes; i++){
         if(i == 0){
             char t = toParse[i];
             tipus[0] = t;
@@ -209,9 +211,7 @@ int MI_DesmontarProtocol(char * toParse, char * data, char * tipus, int * bytes)
         }
     }
 
-    bytes = (int *) atoi(nombreBytes);
-
-    return 1;
+    return atoi(nombreBytes);
 }
 
 
@@ -245,7 +245,7 @@ int MI_HaArribatLinia(int SckConvMI)
 int MI_EnviaLinia(int SckConvMI, const char *Linia)
 {
 	// max_line  costant 204,pero demana 300 i el nom de la var local...
-	char lineMI[304];
+	char lineMI[MAX_LINE];
 	//envia linia 463 esquelet.c
 	sprintf(lineMI, "%s%.3d%s", "L", strlen(Linia), Linia);
 
@@ -263,10 +263,10 @@ int MI_EnviaLinia(int SckConvMI, const char *Linia)
 int MI_EnviaNick(int SckConvMI, const char *Linia)
 {
 	// max_line  costant 204,pero demana 300 i el nom de la var local...
-	char nickMI[304];
+	char nickMI[MAX_LINE];
 	//envia linia 463 esquelet.c
 	sprintf(nickMI, "%s%.3d%s", "N", strlen(Linia), Linia);
-
+    printf("%s\n", nickMI);
 	return TCP_Envia(SckConvMI, nickMI, strlen(nickMI));
 }
 
@@ -283,14 +283,20 @@ int MI_EnviaNick(int SckConvMI, const char *Linia)
 int MI_RepLinia(int SckConvMI, char *Linia)
 {
 	// max_line  costant 204,pero demana 300 i el nom de la var local...
-	char line[304];
+	char line[MAX_LINE];
 
 	// linia 137 esquelet.c
-	int resultatAccio= TCP_Rep(SckConvMI, line, 304);
+	int resultatAccio= TCP_Rep(SckConvMI, line, MAX_LINE);
     if (resultatAccio==0) return -2; // acabar la conversa
 	if (resultatAccio==-1) return -1; // error
+    char tipus;
+    int bytes;
+    int result = MI_DesmontarProtocol(line, Linia, &tipus, &bytes);
+    if(tipus == 'N'){
+        return -1;
+    }
 
-	return resultatAccio; // nombre de caracters n de la linia rebuda
+	return bytes; // nombre de caracters n de la linia rebuda
 }
 
 /* Acaba la conversa associada al socket de conversa de MI                */

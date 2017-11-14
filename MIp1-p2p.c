@@ -80,6 +80,7 @@ int main(int argc,char *argv[])
 
        socketActiu = MI_DemanaConv(ipRemota, port, ipLocal, &portLocal, nickname, nicknameRemot);
        EvalResult(socketActiu, socketsEscoltant, nSockets);
+
        socketsEscoltant[1] = (int)socketActiu;
    }
    // Si el socket actiu no és un teclat fem un accept.
@@ -91,6 +92,8 @@ int main(int argc,char *argv[])
    }
    // -------------------------
 
+   mostraDadesRemotes(nicknameRemot, port, ipRemota);
+
    int resultatAccio = 1;
    while(resultatAccio != 0){
        bzero(missatge, MAX_BUFFER);
@@ -98,6 +101,7 @@ int main(int argc,char *argv[])
        if(socketActiu == TECLAT){
            EvalResult(readFromKeyboard(missatge, MAX_BUFFER), socketsEscoltant, nSockets);
            if(strcmp(missatge,"$")!=1) break;
+           printf("%s\n",missatge);
            resultatAccio = MI_EnviaLinia(socketsEscoltant[1], missatge);
            EvalResult(resultatAccio, socketsEscoltant, nSockets);
        }
@@ -130,7 +134,7 @@ int main(int argc,char *argv[])
 * En cas que hagi tencat l'aplicació haurà mostrat per pantalla l'error que s'ha produït.
 */
 void EvalResult(int res, const int *sockets, int nSockets){
-	if(res < 0){
+	if(res < 0 && res != -2){
 		int i = 0;
 		// Faltaria buidar el buffer del TECLAT que sempre el poso a la posició 0 de sockets.
 		while(sockets != NULL && i<nSockets){
@@ -155,9 +159,9 @@ int readFromKeyboard(char * inData, int numberBytesToRead){
 	{
     return (-1);
 	}
-	printf("%i\n", bytes_llegits);
+	//printf("%i\n", bytes_llegits);
 	inData[bytes_llegits-1] = '\0';
-	printf("%s\n",inData);
+	//printf("%s\n",inData);
 
     return bytes_llegits;
 }
@@ -179,6 +183,9 @@ int getPort(){
 	return portNumber;
 }
 
+int mostraDadesRemotes(char * nicknameR, int portR, char * ipR){
+    printf("Nick = %s\nPort Remot = %i\nIp Remota = %s\n ", nicknameR, portR, ipR);
+}
 
 int getNickname(char * nickname){
 	printf("%s\n", "Entra el teu nickname : ");
