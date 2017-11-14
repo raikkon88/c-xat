@@ -41,7 +41,7 @@ int main(int argc,char *argv[])
    char ipRemota[MAX_IP];      // Ip on es connectarà tant per la connexió de servidor com la de client.
    char nickname[MAX_BUFFER];
    char nicknameRemot[MAX_BUFFER];
-   char missatge[MAX_LINE];
+   char missatge[MAX_BUFFER];
 
    int port = 3000; // Valor per defecte.
    int portLocal;
@@ -51,62 +51,72 @@ int main(int argc,char *argv[])
    int nBytes;
    int res;
 
+   // -------------------------
    // LLegim el port
    port = getPort();
    // LLegim el nickname
    EvalResult(getNickname(nickname), NULL, 0);
-   // Generem una escolta com a servidor
-   //EvalResult(res, socketsEscoltant, nSockets);
-
 
    // Establim els sockets que escoltarem de moment.
    socketsEscoltant[0] = TECLAT;
-
-   //***
    socketsEscoltant[1] = MI_IniciaEscPetiRemConv(port);
-   //***
 
    printf("Benvingut %s , has configurat el port %i\n", nickname, port);
    EvalResult(socketsEscoltant[1], socketsEscoltant, nSockets);
    nSockets = 2;
-
    int socketActiu;
-   //printf("Quedem escoltant que arrivi alguna cosa.\n");
+
    printf("Escriu la Ip de on et vols connectar o espera't que es connectin amb tu.\n");
 
-   //***
+   // -------------------------
    socketActiu=MI_HaArribatPetiConv(socketsEscoltant[1]);
-   //***
-
    EvalResult(socketActiu, socketsEscoltant, nSockets);
-   //printf("HA arrivat per el socket : %i\n", socketActiu);
+   // -------------------------
+
    // Si el socket actiu és el teclat fem un socket i un connect.
    if(socketActiu == TECLAT){
-
-       //readFromKeyboard(ipRemota);
        int ipLong = getIPAddress(ipRemota);
-       //printf("%s\n", ipRemota);
        EvalResult(ipLong, socketsEscoltant, nSockets);
-       //printf("%s\n", ipRemota.buffer);
-       //printf("%s\n", ipRemota);
-
-       //*** linia 107 esquelet.c
 
        socketActiu = MI_DemanaConv(ipRemota, port, ipLocal, &portLocal, nickname, nicknameRemot);
+       EvalResult(socketActiu, socketsEscoltant, nSockets);
        socketsEscoltant[1] = (int)socketActiu;
-       //printf("Ha creat un socket client i està demanant connexió : \n");
-       //EvalResult(TCP_DemanaConnexio(socketActiu, ipRemota.buffer, port), socketsEscoltant, nSockets);
-       //EvalResult(TCP_DemanaConnexio(socketActiu, ipRemota, port), socketsEscoltant, nSockets);
-       //printf("Ha demanat la connexió \n");
-
    }
    // Si el socket actiu no és un teclat fem un accept.
    else {
-       // ***
-       MI_AcceptaConv(socketActiu, ipRemota, &port, ipLocal, &portLocal, nickname, nicknameRemot);
-       printf("Ha acceptat connexió \n");
+
+       socketActiu = MI_AcceptaConv(socketActiu, ipRemota, &port, ipLocal, &portLocal, nickname, nicknameRemot);
+       EvalResult(socketActiu, socketsEscoltant, nSockets);
        socketsEscoltant[1] = socketActiu;
    }
+   // -------------------------
+
+   int resultatAccio = 1;
+   while(resultatAccio != 0){
+       bzero(missatge, MAX_BUFFER);
+       socketActiu = MI_HaArribatLinia(socketsEscoltant[1]);
+       if(socketActiu == TECLAT){
+           EvalResult(readFromKeyboard(missatge, MAX_BUFFER), socketsEscoltant, nSockets);
+           if(strcmp(missatge,"$")!=1) break;
+           resultatAccio = MI_EnviaLinia(socketsEscoltant[1], missatge);
+           EvalResult(resultatAccio, socketsEscoltant, nSockets);
+       }
+       else{
+           resultatAccio = MI_RepLinia(socketActiu, missatge);
+           if(resultatAccio != 0){
+               printf("%s\n", missatge);
+           }
+       }
+       EvalResult(resultatAccio, socketsEscoltant, nSockets);
+   }
+
+   int i;
+   // Tenca tots els sockets
+   for(i = 0; i < nSockets; i++){
+       close(socketsEscoltant[i]);
+   }
+
+   return (0);
 
  }
 

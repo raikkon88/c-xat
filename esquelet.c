@@ -129,7 +129,7 @@ int main(int argc,char *argv[])
 		socketActiu = HaArribatAlgunaCosa(socketsEscoltant, nSockets);
 		if(socketActiu == TECLAT){
 			EvalResult(readFromKeyboard(missatge, MAX_BUFFER), socketsEscoltant, nSockets);
-			if(strcmp(missatge,"$")!=1) break;int
+			if(strcmp(missatge,"$")!=1) break;
 			resultatAccio = envia_linia(socketsEscoltant[1], missatge);
 			//resultatAccio = TCP_Envia(socketsEscoltant[1], missatge, strlen(missatge));
 		}
