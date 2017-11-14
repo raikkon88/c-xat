@@ -52,7 +52,7 @@ void MostraError(const char *text);
 /* creat si tot va bé.                                                    */
 int MI_IniciaEscPetiRemConv(int portTCPloc)
 {
-    TCP_CreaSockServidor(ALL_INTERFACES, portTCPloc);
+    return TCP_CreaSockServidor(ALL_INTERFACES, portTCPloc);
 }
 
 /* Escolta indefinidament fins que arriba una petició local de conversa   */
@@ -63,7 +63,13 @@ int MI_IniciaEscPetiRemConv(int portTCPloc)
 /* arriba una petició remota.                                             */
 int MI_HaArribatPetiConv(int SckEscMI)
 {
-    
+	int socketsEscoltant[2];
+
+	socketsEscoltant[0] = 0; // TECLAT
+	socketsEscoltant[1] = SckEscMI;
+
+	return HaArribatAlgunaCosa(socketsEscoltant,2);
+
 }
 
 /* Crea una conversa iniciada per una petició local que arriba a través   */
@@ -87,6 +93,30 @@ int MI_HaArribatPetiConv(int SckEscMI)
 /* MI creat si tot va bé.                                                 */
 int MI_DemanaConv(const char *IPrem, int portTCPrem, char *IPloc, int *portTCPloc, const char *NicLoc, char *NicRem)
 {
+	// crea socket Local
+	int SocketLocal = TCP_CreaSockClient("0.0.0.0",0);
+
+	//connectar al server
+	int sck= TCP_DemanaConnexio(SocketLocal,IPrem,portTCPrem);  // el socket de la conversa linia 108 esquelet.c
+	// Omple “IPloc*” i “portTCPloc*”
+	TCP_TrobaAdrSockLoc(sck,IPloc,portTCPloc);
+
+	// enviar i rebre nicknames falta fer... prob fallara
+	char nick[304];
+	//linia 469 esquelet.c
+	sprintf(nick, "%s%.3d%s", "N", strlen(NicLoc), NicLoc);
+	//envia nicklocal al server
+	int nbyteNick = TCP_Envia(sck, nick, strlen(nick));
+	// if nbyteNick == ... return ...
+
+	char nickopponent[304];
+
+	// linia 137 esquelet.c
+	int resultatAccio= TCP_Rep(sck, nickopponent, 304);
+	//if resultatAccio ==... return ....
+	// NicRem= ~~~ no se si guarda de forma N,Strlen,Nic o nomes Nic
+
+	return sck;
 
 }
 
@@ -110,8 +140,80 @@ int MI_DemanaConv(const char *IPrem, int portTCPrem, char *IPloc, int *portTCPlo
 /* de MI creat si tot va bé.                                              */
 int MI_AcceptaConv(int SckEscMI, char *IPrem, int *portTCPrem, char *IPloc, int *portTCPloc, const char *NicLoc, char *NicRem)
 {
+	// acceptar connexio
+	int socketActiu= TCP_AcceptaConnexio(SckEscMI,IPrem,portTCPrem); // linia 119 esquelet.c
+    if(socketActiu == -1){
+        return -1;
+    }
+	// Omple “IPloc*” i “portTCPloc*”
+	if(TCP_TrobaAdrSockLoc(socketActiu,IPloc,portTCPloc)==-1){
+        return -1;
+    }
+	// rebre i envia nicknames falta fer...
+
+
+	char nickopponent[304];
+
+	// linia 137 esquelet.c
+	int resultatAccio= TCP_Rep(socketActiu, nickopponent, 304);
+    if(resultatAccio <=0){
+        return -1;
+    }
+
+    char tipus;
+    int bytes;
+    char nickNet[300];
+
+    resultatAccio = MI_DesmontarProtocol(nickopponent, &nickNet, &tipus, &bytes);
+    if(resultatAccio < 0){
+        return resultatAccio;
+    }
+    if(tipus == 'L'){
+        return -3;
+    }
+
+    // Ja s'ha rebut el nick de l'altre.
+    strcpy(NicRem, nickNet);
+
+	//if resultatAccio ==... return ....
+	// NicRem= ~~~ no se si guarda de forma N,Strlen,Nic o nomes Nic
+
+	//char nick[304];
+	//linia 469 esquelet.c
+
+	// envia nicklocal al server
+	int nbyteNick = MI_EnviaNick(socketActiu, NicLoc); //TCP_Envia(sck, nick, strlen(nick));
+    if(nbyteNick < 0){
+        return -1;
+    }
+	// if nbyteNick == ... return ...
+
+	return socketActiu;
 
 }
+
+int MI_DesmontarProtocol(char * toParse, char * data, char * tipus, int * bytes){
+
+    char nombreBytes[3];
+    int i;
+    for(i = 0; i < strlen(toParse); i++){
+        if(i == 0){
+            char t = toParse[i];
+            tipus[0] = t;
+        }
+        else if(i >0 && i < 4){
+            nombreBytes[i-1] = toParse[i];
+        }
+        else{
+            data[i-4]=toParse[i];
+        }
+    }
+
+    bytes = (int *) atoi(nombreBytes);
+
+    return 1;
+}
+
 
 /* Escolta indefinidament fins que arriba una línia local de conversa a   */
 /* través del teclat o bé una línia remota de conversa a través del       */
@@ -121,6 +223,14 @@ int MI_AcceptaConv(int SckEscMI, char *IPrem, int *portTCPrem, char *IPloc, int 
 /* arriba una línia remota.                                               */
 int MI_HaArribatLinia(int SckConvMI)
 {
+
+	int socketsEscoltant[2];
+
+	socketsEscoltant[0] = 0; // TECLAT
+	socketsEscoltant[1] = SckConvMI;
+
+	return HaArribatAlgunaCosa(socketsEscoltant,2);
+
 
 }
 
@@ -134,7 +244,30 @@ int MI_HaArribatLinia(int SckConvMI)
 /* enviada (sense el ‘\0’) si tot va bé (0 <= n <= 299).                  */
 int MI_EnviaLinia(int SckConvMI, const char *Linia)
 {
+	// max_line  costant 204,pero demana 300 i el nom de la var local...
+	char lineMI[304];
+	//envia linia 463 esquelet.c
+	sprintf(lineMI, "%s%.3d%s", "L", strlen(Linia), Linia);
 
+	return TCP_Envia(SckConvMI, lineMI, strlen(lineMI));
+}
+
+/* Envia a través del socket de conversa de MI d’identificador            */
+/* “SckConvMI” (un socket “connectat”) la línia “Linia” escrita per       */
+/* l’usuari local.                                                        */
+/* "Linia" és un "string" de C (vector de chars imprimibles acabat en     */
+/* '\0'), no conté el caràcter fi de línia ('\n') i té una longitud       */
+/* màxima de 300 chars (incloent '\0').                                   */
+/* Retorna -1 si hi ha error; el nombre de caràcters n de la línia        */
+/* enviada (sense el ‘\0’) si tot va bé (0 <= n <= 299).                  */
+int MI_EnviaNick(int SckConvMI, const char *Linia)
+{
+	// max_line  costant 204,pero demana 300 i el nom de la var local...
+	char nickMI[304];
+	//envia linia 463 esquelet.c
+	sprintf(nickMI, "%s%.3d%s", "N", strlen(Linia), Linia);
+
+	return TCP_Envia(SckConvMI, nickMI, strlen(nickMI));
 }
 
 /* Rep a través del socket de conversa de MI d’identificador “SckConvMI”  */
@@ -149,7 +282,15 @@ int MI_EnviaLinia(int SckConvMI, const char *Linia)
 /* (0 <= n <= 299).                                                       */
 int MI_RepLinia(int SckConvMI, char *Linia)
 {
+	// max_line  costant 204,pero demana 300 i el nom de la var local...
+	char line[304];
 
+	// linia 137 esquelet.c
+	int resultatAccio= TCP_Rep(SckConvMI, line, 304);
+    if (resultatAccio==0) return -2; // acabar la conversa
+	if (resultatAccio==-1) return -1; // error
+
+	return resultatAccio; // nombre de caracters n de la linia rebuda
 }
 
 /* Acaba la conversa associada al socket de conversa de MI                */
@@ -157,8 +298,11 @@ int MI_RepLinia(int SckConvMI, char *Linia)
 /* Retorna -1 si hi ha error; un valor positiu qualsevol si tot va bé.    */
 int MI_AcabaConv(int SckConvMI)
 {
+	return TCP_TancaSock(SckConvMI);
 
 }
+
+
 
 /* Acaba l’escolta de peticions remotes de conversa que arriben a través  */
 /* del socket d’escolta de MI d’identificador “SckEscMI” (un socket       */
@@ -166,9 +310,8 @@ int MI_AcabaConv(int SckConvMI)
 /* Retorna -1 si hi ha error; un valor positiu qualsevol si tot va bé.    */
 int MI_AcabaEscPetiRemConv(int SckEscMI)
 {
-
+	return TCP_TancaSock(SckEscMI);
 }
-
 
 /* Definicio de funcions INTERNES, és a dir, d'aquelles que es faran      */
 /* servir només en aquest mateix fitxer.                                  */
@@ -410,6 +553,3 @@ void MostraError(const char *text)
 {
     fprintf(stderr, "%s: %s\n", text, strerror(errno));
 }
-
-
-/* Si ho creieu convenient, feu altres funcions...                        */
