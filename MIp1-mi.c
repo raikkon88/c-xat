@@ -170,7 +170,7 @@ int MI_AcceptaConv(int SckEscMI, char *IPrem, int *portTCPrem, char *IPloc, int 
     char tipus;
     int bytes;
     char nickNet[300];
-
+    printf("Nombre de caràcters llegits per TCP : %i\n", resultatAccio);
     resultatAccio = MI_DesmontarProtocol(nickopponent, &nickNet, &tipus, resultatAccio);
     if(resultatAccio < 0){
         return resultatAccio;
@@ -204,6 +204,7 @@ int MI_DesmontarProtocol(char * toParse, char * data, char * tipus, int bytes){
     char nombreBytes[3];
     int i;
     for(i = 0; i < (int) bytes; i++){
+        //printf("Positicio :%i , valor -> %i\n",i , toParse[i]);
         if(i == 0){
             char t = toParse[i];
             tipus[0] = t;
@@ -215,7 +216,6 @@ int MI_DesmontarProtocol(char * toParse, char * data, char * tipus, int bytes){
             data[i-4]=toParse[i];
         }
     }
-
     return atoi(nombreBytes);
 }
 
