@@ -38,10 +38,15 @@ int main(int argc,char *argv[])
    char ipLocal[MAX_IP] = "0.0.0.0";
 
    // Creem les linies de dades del protocol.
-   char ipRemota[MAX_IP];      // Ip on es connectarà tant per la connexió de servidor com la de client.
-   char nickname[MAX_BUFFER];
-   char nicknameRemot[MAX_BUFFER];
-   char missatge[MAX_BUFFER];
+   char ipRemota        [MAX_IP];      // Ip on es connectarà tant per la connexió de servidor com la de client.
+   char nickname        [MAX_BUFFER];
+   char nicknameRemot   [MAX_BUFFER];
+   char missatge        [MAX_BUFFER];
+
+   bzero(ipRemota,      MAX_IP);
+   bzero(nickname,      MAX_BUFFER);
+   bzero(nicknameRemot, MAX_BUFFER);
+   bzero(missatge,      MAX_BUFFER);
 
    int port = 3000; // Valor per defecte.
    int portLocal;
@@ -95,7 +100,7 @@ int main(int argc,char *argv[])
    mostraDadesRemotes(nicknameRemot, port, ipRemota);
 
    int resultatAccio = 1;
-   while(resultatAccio != 0){
+   while(resultatAccio < 0){
        bzero(missatge, MAX_BUFFER);
        socketActiu = MI_HaArribatLinia(socketsEscoltant[1]);
        if(socketActiu == TECLAT){
@@ -111,14 +116,16 @@ int main(int argc,char *argv[])
                printf("%s\n", missatge);
            }
        }
-       EvalResult(resultatAccio, socketsEscoltant, nSockets);
    }
 
-   int i;
+   // En cas que el resultat sigui -2 o -1 es tenquen tots els sockets.
+   EvalResult(resultatAccio, socketsEscoltant, nSockets);
+
+   //int i;
    // Tenca tots els sockets
-   for(i = 0; i < nSockets; i++){
-       close(socketsEscoltant[i]);
-   }
+   // for(i = 0; i < nSockets; i++){
+   //     close(socketsEscoltant[i]);
+   // }
 
    return (0);
 
