@@ -195,7 +195,7 @@ int MI_DesmontarProtocol(char * toParse, char * data, char * tipus, int bytes){
     char nombreBytes[3];
     int i;
     for(i = 0; i < (int) bytes; i++){
-        printf("Positicio :%i , valor -> %i\n",i , toParse[i]);
+        //printf("Positicio :%i , valor -> %i\n",i , toParse[i]);
         if(i == 0){
             char t = toParse[i];
             tipus[0] = t;
