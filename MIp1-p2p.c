@@ -99,10 +99,19 @@ int main(int argc,char *argv[])
 
    mostraDadesRemotes(nicknameRemot, port, ipRemota);
 
+   /* NO ESTÀ ACABAT, aquí hi ha els nicknames amb el prompt preparat,
+    * s'ha de mirar com buidar el buffer de la pantalla i tornar a escrire-hi
+    */
+   char promptLocal[strlen(nickname)+1];
+   creaPrompt(promptLocal, nickname);
+
+   char promptRemot[strlen(nicknameRemot)+1];
+   creaPrompt(promptRemot, nicknameRemot);
+
    int resultatAccio = 1;
    while(resultatAccio > 0){
        bzero(missatge, MAX_BUFFER);
-       printf("%s>", nickname);
+       //fputs(promptLocal, stdout);
        socketActiu = MI_HaArribatLinia(socketsEscoltant[1]);
        if(socketActiu == TECLAT){
            EvalResult(readFromKeyboard(missatge, MAX_BUFFER), socketsEscoltant, nSockets);
@@ -113,7 +122,11 @@ int main(int argc,char *argv[])
        else{
            resultatAccio = MI_RepLinia(socketActiu, missatge);
            if(resultatAccio != 0){
-               printf("%s>%s\n", nicknameRemot, missatge);
+               //fseek(stdout, 0, SEEK_SET);
+               //fputs(promptRemot, stdout);
+               //puts(missatge);
+
+              printf("%s\n", missatge);
            }
        }
    }
@@ -121,11 +134,11 @@ int main(int argc,char *argv[])
    // En cas que el resultat sigui -2 o -1 es tenquen tots els sockets.
    EvalResult(resultatAccio, socketsEscoltant, nSockets);
 
-   //int i;
-   // Tenca tots els sockets
-   // for(i = 0; i < nSockets; i++){
-   //     close(socketsEscoltant[i]);
-   // }
+   int i;
+   //Tenca tots els sockets
+   for(i = 0; i < nSockets; i++){
+       close(socketsEscoltant[i]);
+   }
 
    return (0);
 
@@ -174,6 +187,16 @@ int readFromKeyboard(char * inData, int numberBytesToRead){
 }
 
 /**
+ * Crea el prompt donat un nickname i el desa al paràmetre prompt passat per referència.
+ * prompt conté el nick + el caràcter '>'
+ */
+int creaPrompt(char * prompt, char * nick){
+    bzero(prompt, strlen(nick)+1);
+    strcpy(prompt, nick);
+    prompt[strlen(nick)] = '>';
+}
+
+/**
  * Llegeix un número de teclat que fa referència al port.
  * Retorna aquest número com un enter positiu > 0.
  * Si hi ha error retorna -1.
@@ -191,9 +214,9 @@ int getPort(){
 }
 
 int mostraDadesRemotes(char * nicknameR, int portR, char * ipR){
-    printf("-------------------------------------------------\n");
-    printf("Establerta connexió amb %s a la ip %s i el port %i\n", nicknameR, ipR, portR);
-    printf("-------------------------------------------------\n");
+    printf("/*------------------------------------------------------------------*/\n");
+    printf("/* Establerta connexió amb %s a la ip %s i el port %i */\n", nicknameR, ipR, portR);
+    printf("/*------------------------------------------------------------------*/\n");
 }
 
 int getNickname(char * nickname){
