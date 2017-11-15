@@ -102,6 +102,7 @@ int main(int argc,char *argv[])
    int resultatAccio = 1;
    while(resultatAccio > 0){
        bzero(missatge, MAX_BUFFER);
+       printf("%s>", nickname);
        socketActiu = MI_HaArribatLinia(socketsEscoltant[1]);
        if(socketActiu == TECLAT){
            EvalResult(readFromKeyboard(missatge, MAX_BUFFER), socketsEscoltant, nSockets);
@@ -112,7 +113,7 @@ int main(int argc,char *argv[])
        else{
            resultatAccio = MI_RepLinia(socketActiu, missatge);
            if(resultatAccio != 0){
-               printf("%s\n", missatge);
+               printf("%s>%s\n", nicknameRemot, missatge);
            }
        }
    }
@@ -190,7 +191,9 @@ int getPort(){
 }
 
 int mostraDadesRemotes(char * nicknameR, int portR, char * ipR){
-    printf("Nick = %s\nPort Remot = %i\nIp Remota = %s\n", nicknameR, portR, ipR);
+    printf("-------------------------------------------------\n");
+    printf("Establerta connexió amb %s a la ip %s i el port %i\n", nicknameR, ipR, portR);
+    printf("-------------------------------------------------\n");
 }
 
 int getNickname(char * nickname){
