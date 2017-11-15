@@ -100,7 +100,7 @@ int main(int argc,char *argv[])
    mostraDadesRemotes(nicknameRemot, port, ipRemota);
 
    int resultatAccio = 1;
-   while(resultatAccio < 0){
+   while(resultatAccio > 0){
        bzero(missatge, MAX_BUFFER);
        socketActiu = MI_HaArribatLinia(socketsEscoltant[1]);
        if(socketActiu == TECLAT){
