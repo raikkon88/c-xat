@@ -51,6 +51,7 @@ int main(int argc,char *argv[])
 
    int port; // Valor per defecte.
    int portLocal=0;
+   int fi = 1;
 
    int socketsEscoltant[2];
    int socketEscoltador;
@@ -65,8 +66,7 @@ int main(int argc,char *argv[])
    printf("/* Entra un nick per comunicar-te\n");
    EvalResult(getNickname(nickname), NULL, 0);
    socketsEscoltant[0] = TECLAT;
-   while(1){
-
+   while(fi != 0){
        socketEscoltador = MI_IniciaEscPetiRemConv(PORT_DEFECTE);
        socketsEscoltant[1] = socketEscoltador;
        EvalResult(socketEscoltador, socketsEscoltant, nSockets); // Evaluem el resultat de l'anterior instrucció
@@ -90,7 +90,7 @@ int main(int argc,char *argv[])
        socketActiu=MI_HaArribatPetiConv(socketsEscoltant[1]);
        EvalResult(socketActiu, socketsEscoltant, nSockets);
        if(socketActiu == TECLAT){
-           port = getPort();
+           port = getNumber();
            int ipLong = getIPAddress(ipRemota);
            EvalResult(ipLong, socketsEscoltant, nSockets);
            socketActiu = MI_DemanaConv(ipRemota, port, ipLocal, &portLocal, nickname, nicknameRemot);
@@ -138,12 +138,13 @@ int main(int argc,char *argv[])
        EvalResult(resultatAccio, socketsEscoltant, nSockets);
 
        int i;
-       //Tenca tots els sockets
-       // for(i = 0; i < nSockets; i++){
-       //
-       // }
        close(socketsEscoltant[1]);
        socketsEscoltant[1] = socketEscoltador;
+       printf("/*-------------------------------------------------------------------*/\n");
+       printf("/* CONVERSA ACABADA, vols seguir amb el programa?? ");
+       printf("/* Entre '1' per continuar '0' per acabar ");
+       printf("/*-------------------------------------------------------------------*/\n");
+       fi = getNumber();
    }
 
 
@@ -208,7 +209,7 @@ int creaPrompt(char * prompt, char * nick){
  * Retorna aquest número com un enter positiu > 0.
  * Si hi ha error retorna -1.
  */
-int getPort(){
+int getNumber(){
 	char port[MAX_BUFFER];
 	bzero(port, '\0');
 	int res = readFromKeyboard(port, MAX_PORT);
