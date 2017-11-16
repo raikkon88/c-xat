@@ -64,8 +64,9 @@ int main(int argc,char *argv[])
    printf("/*---------------------------------------------------\n");
    printf("/* Entra un nick per comunicar-te\n");
    EvalResult(getNickname(nickname), NULL, 0);
+   socketsEscoltant[0] = TECLAT;
    while(1){
-       socketsEscoltant[0] = TECLAT;
+
        socketEscoltador = MI_IniciaEscPetiRemConv(PORT_DEFECTE);
        socketsEscoltant[1] = socketEscoltador;
        EvalResult(socketEscoltador, socketsEscoltant, nSockets); // Evaluem el resultat de l'anterior instrucció
@@ -138,9 +139,10 @@ int main(int argc,char *argv[])
 
        int i;
        //Tenca tots els sockets
-       for(i = 0; i < nSockets; i++){
-           close(socketsEscoltant[i]);
-       }
+       // for(i = 0; i < nSockets; i++){
+       //
+       // }
+       close(socketsEscoltant[1]);
        socketsEscoltant[1] = socketEscoltador;
    }
 
