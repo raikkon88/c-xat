@@ -212,7 +212,7 @@ int MI_DescobreixIpIPortDinamic(int sck, char * ipLocal){
     if(fgets(ipLocal, 1024, fd) == NULL) return -1;
     ipLocal[strlen(ipLocal)-1]='\0';
     int status = pclose(fd);
-    printf("Ip configurada de manera local : %s\nPort configurat de manera local : %i\n", ipLocal, local_port);
+
     if(status < 0) return status;
     else return local_port;
 }

@@ -26,7 +26,7 @@
 #define MAX_TYPE 			2
 #define MAX_IP 				16
 #define MAX_LINE			304
-#define MAX_PORT			5
+#define MAX_PORT			6
 
 /* Definició de funcions per el programa principal                          */
 void EvalResult(int res, const int *sockets, int nSockets);
@@ -53,11 +53,16 @@ int main(int argc,char *argv[])
    int portLocal=0;
 
    int socketsEscoltant[2];
-   int nSockets = 1;
+   int nSockets = 2;
    int nBytes;
    int res;
+   int socketActiu;
 
-
+   printf("/*-------------------------------------------------------------------*/\n");
+   printf("/* XAT DE XARXES -> Autors : Fent Lin i Marc Sánchez\n");
+   printf("/*-------------------------------------------------------------------*/\n");
+   printf("  Entra un nick per comunicar-te\n");
+   EvalResult(getNickname(nickname), NULL, 0);
 
    // Establim els sockets que escoltarem de moment.
    socketsEscoltant[0] = TECLAT;
@@ -66,38 +71,21 @@ int main(int argc,char *argv[])
    // Obtenim el port i la ip locals assignades dinàmicament.
    portLocal = MI_DescobreixIpIPortDinamic(socketsEscoltant[1], ipLocal);
    EvalResult(portLocal, socketsEscoltant, 2);
+   printf("Ip configurada de manera local : %s\nPort configurat de manera local : %i\n", ipLocal, portLocal);
 
-   // -------------------------
-   // LLegim el port al que es connectarà
-   port = getPort();
-   // LLegim el nickname amb qui vol connectar-ser
-   EvalResult(getNickname(nickname), NULL, 0);
-
-   printf("Benvingut %s , has configurat el port %i\n", nickname, port);
-
-   nSockets = 2;
-   int socketActiu;
-
-   printf("Escriu la Ip de on et vols connectar o espera't que es connectin amb tu.\n");
-
-   // -------------------------
+   printf("  Espera que es connectin o configura un port i una ip per aquest ordre per realitzar la connexió.\n");
    socketActiu=MI_HaArribatPetiConv(socketsEscoltant[1]);
    EvalResult(socketActiu, socketsEscoltant, nSockets);
-   // -------------------------
-
-   // Si el socket actiu és el teclat fem un socket i un connect.
    if(socketActiu == TECLAT){
+       port = getPort();
        int ipLong = getIPAddress(ipRemota);
        EvalResult(ipLong, socketsEscoltant, nSockets);
-
        socketActiu = MI_DemanaConv(ipRemota, port, ipLocal, &portLocal, nickname, nicknameRemot);
        EvalResult(socketActiu, socketsEscoltant, nSockets);
-
        socketsEscoltant[1] = (int)socketActiu;
    }
    // Si el socket actiu no és un teclat fem un accept.
    else {
-
        socketActiu = MI_AcceptaConv(socketActiu, ipRemota, &port, ipLocal, &portLocal, nickname, nicknameRemot);
        EvalResult(socketActiu, socketsEscoltant, nSockets);
        socketsEscoltant[1] = socketActiu;
@@ -106,14 +94,14 @@ int main(int argc,char *argv[])
 
    mostraDadesRemotes(nicknameRemot, port, ipRemota);
 
-   /* NO ESTÀ ACABAT, aquí hi ha els nicknames amb el prompt preparat,
-    * s'ha de mirar com buidar el buffer de la pantalla i tornar a escrire-hi
-    */
-   char promptLocal[strlen(nickname)+1];
-   creaPrompt(promptLocal, nickname);
-
-   char promptRemot[strlen(nicknameRemot)+1];
-   creaPrompt(promptRemot, nicknameRemot);
+   // Intent de treure els prompts local i remot
+   // S'ha intentat accedir al buffer de la pantalla per extreure el prompt si arriva algu i sinó es pinta l'altre.
+   //---------------------------------------------------------------------------------------------------------------
+   // char promptLocal[strlen(nickname)+1];
+   // creaPrompt(promptLocal, nickname);
+   //
+   // char promptRemot[strlen(nicknameRemot)+1];
+   // creaPrompt(promptRemot, nicknameRemot);
 
    int resultatAccio = 1;
    while(resultatAccio > 0){
@@ -128,7 +116,7 @@ int main(int argc,char *argv[])
        else{
            resultatAccio = MI_RepLinia(socketActiu, missatge);
            if(resultatAccio != 0){
-               printf("%s%s\n", promptRemot, missatge);
+               printf("%s\n", missatge);
            }
        }
    }
@@ -216,9 +204,9 @@ int getPort(){
 }
 
 int mostraDadesRemotes(char * nicknameR, int portR, char * ipR){
-    printf("/*------------------------------------------------------------------*/\n");
-    printf("/* Establerta connexió amb %s a la ip %s i el port %i */\n", nicknameR, ipR, portR);
-    printf("/*------------------------------------------------------------------*/\n");
+    printf("/*-------------------------------------------------------------------*/\n");
+    printf("/* Establerta connexió amb %s a la ip %s i el port %i\n", nicknameR, ipR, portR);
+    printf("/*-------------------------------------------------------------------*/\n");
 }
 
 int getNickname(char * nickname){
