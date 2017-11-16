@@ -145,19 +145,14 @@ int MI_DemanaConv(const char *IPrem, int portTCPrem, char *IPloc, int *portTCPlo
 /* de MI creat si tot va bé.                                              */
 int MI_AcceptaConv(int SckEscMI, char *IPrem, int *portTCPrem, char *IPloc, int *portTCPloc, const char *NicLoc, char *NicRem)
 {
-	// acceptar connexio
-	int socketActiu= TCP_AcceptaConnexio(SckEscMI,IPrem,portTCPrem); // linia 119 esquelet.c
+
+    // acceptar connexio
+    int portRemot;
+	int socketActiu= TCP_AcceptaConnexio(SckEscMI,IPrem,&portRemot); // linia 119 esquelet.c
     if(socketActiu == -1){
         return -1;
     }
-	// Omple “IPloc*” i “portTCPloc*”
-	// if(TCP_TrobaAdrSockLoc(socketActiu,IPloc,portTCPloc)==-1){
-    //     return -1;
-    // }
-
-    if(TCP_TrobaAdrSockRem(socketActiu, IPrem, portTCPrem) == -1){
-        return -1;
-    }
+    *portTCPrem = portRemot;
 
     char nickopponent[MAX_LINE];
 
@@ -459,8 +454,9 @@ int TCP_AcceptaConnexio(int Sck, char *IPrem, int *portTCPrem)
 	}
 
 	// S'ha establert la connexió i s'emplenen les dades de qui s'ha connectat a les variables d'entrada.
-	IPrem = inet_ntoa(adrConnexio.sin_addr);
-	portTCPrem = (int *) (int) ntohs(adrConnexio.sin_port);
+    strcpy(IPrem, inet_ntoa(adrConnexio.sin_addr));
+	//IPrem = inet_ntoa(adrConnexio.sin_addr);
+	*portTCPrem = (int)(intptr_t)ntohs(adrConnexio.sin_port);
 	return socket;
 }
 
@@ -514,7 +510,7 @@ int TCP_TrobaAdrSockLoc(int Sck, char *IPloc, int *portTCPloc)
 	strcpy(IPloc, inet_ntoa(adrrem.sin_addr));
 	//portTCPloc = (int*)ntohs(adrrem.sin_port);
 
-	portTCPloc = (int*)(intptr_t)ntohs(adrrem.sin_port);
+	*portTCPloc = (int)(intptr_t)ntohs(adrrem.sin_port);
 	//portTCPloc = res;
 }
 
@@ -534,9 +530,8 @@ int TCP_TrobaAdrSockRem(int Sck, char *IPrem, int *portTCPrem)
 		return -1;
 	}
 	strcpy(IPrem, inet_ntoa(adrrem.sin_addr));
-	int res[1];
-	res[0] = ntohs(adrrem.sin_port);
-	portTCPrem = res;
+    *portTCPrem = (int)(intptr_t)ntohs(adrrem.sin_port);
+
 }
 
 /* Examina simultàniament i sense límit de temps (una espera indefinida)  */

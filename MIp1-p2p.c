@@ -49,7 +49,7 @@ int main(int argc,char *argv[])
    bzero(nicknameRemot, MAX_BUFFER);
    bzero(missatge,      MAX_BUFFER);
 
-   int port = 3000; // Valor per defecte.
+   int port; // Valor per defecte.
    int portLocal=0;
 
    int socketsEscoltant[2];
@@ -64,21 +64,22 @@ int main(int argc,char *argv[])
    printf("/*---------------------------------------------------\n");
    printf("/* Entra un nick per comunicar-te\n");
    EvalResult(getNickname(nickname), NULL, 0);
-   socketsEscoltant[0] = TECLAT;
-   socketEscoltador = MI_IniciaEscPetiRemConv(PORT_DEFECTE);
-   socketsEscoltant[1] = socketEscoltador;
-   EvalResult(socketEscoltador, socketsEscoltant, nSockets); // Evaluem el resultat de l'anterior instrucció
-   // Obtenim el port i la ip locals assignades dinàmicament.
-   portLocal = MI_DescobreixIpIPortDinamic(socketsEscoltant[1], ipLocal);
-   EvalResult(portLocal, socketsEscoltant, 2);
-   printf("/*-------------------------------------------------------------------*/\n");
-   printf("/* Informació del programa : */\n");
-   printf("/*---------------------------------------------------\n");
-   printf("/* Ip configurada de manera local : %s\n",ipLocal);
-   printf("/* Port configurat de manera local : %i\n", portLocal);
-
-   // printf("Espera que es connectin o configura un port i una ip per aquest ordre per realitzar la connexió.\n");
    while(1){
+       socketsEscoltant[0] = TECLAT;
+       socketEscoltador = MI_IniciaEscPetiRemConv(PORT_DEFECTE);
+       socketsEscoltant[1] = socketEscoltador;
+       EvalResult(socketEscoltador, socketsEscoltant, nSockets); // Evaluem el resultat de l'anterior instrucció
+       // Obtenim el port i la ip locals assignades dinàmicament.
+       portLocal = MI_DescobreixIpIPortDinamic(socketsEscoltant[1], ipLocal);
+       EvalResult(portLocal, socketsEscoltant, 2);
+       printf("/*-------------------------------------------------------------------*/\n");
+       printf("/* Informació del programa : */\n");
+       printf("/*---------------------------------------------------\n");
+       printf("/* Ip configurada de manera local : %s\n",ipLocal);
+       printf("/* Port configurat de manera local : %i\n", portLocal);
+
+       // printf("Espera que es connectin o configura un port i una ip per aquest ordre per realitzar la connexió.\n");
+
        printf("/*-------------------------------------------------------------------*/\n");
        printf("/* Funcionament del programa : \n");
        printf("/* Opció 1 -> Espera que es connectin a la ip i port anteriors\n");
@@ -140,6 +141,7 @@ int main(int argc,char *argv[])
        for(i = 0; i < nSockets; i++){
            close(socketsEscoltant[i]);
        }
+       socketsEscoltant[1] = socketEscoltador;
    }
 
 
@@ -207,7 +209,6 @@ int creaPrompt(char * prompt, char * nick){
 int getPort(){
 	char port[MAX_BUFFER];
 	bzero(port, '\0');
-	printf("%s\n", "Entra el número de port que ha de fer servir el programa \nHa de ser un enter positiu entre 0 i 65000 : ");
 	int res = readFromKeyboard(port, MAX_PORT);
 	printf("Has entrat el port %s\n",port);
 	EvalResult(res, NULL, 0); // Indiquem que no hi ha sockets amb un 0 i així no petarà.
