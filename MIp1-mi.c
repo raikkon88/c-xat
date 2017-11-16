@@ -202,7 +202,7 @@ int MI_DescobreixIpIPortDinamic(int sck){
     }
 
     FILE *fd;
-    char command[1024] = "ifconfig eth0 | grep \"inet addr\" | sed -r 's/ +/:/g' | cut -d \":\" -f 4";
+    char command[1024] = "ifconfig | head -n 2 | grep \"inet addr\" | sed -r 's/ +/:/g' | cut -d \":\" -f 4";
     char ipLocal[16];
     fd = popen(command, "r");
     if(fd == NULL){
