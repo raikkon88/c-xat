@@ -91,6 +91,7 @@ int main(int argc,char *argv[])
        EvalResult(socketActiu, socketsEscoltant, nSockets);
        if(socketActiu == TECLAT){
            port = getNumber();
+           printf("/* Has entrat el port %i, ara entra la ip : \n", port);
            int ipLong = getIPAddress(ipRemota);
            EvalResult(ipLong, socketsEscoltant, nSockets);
            socketActiu = MI_DemanaConv(ipRemota, port, ipLocal, &portLocal, nickname, nicknameRemot);
@@ -141,8 +142,8 @@ int main(int argc,char *argv[])
        close(socketsEscoltant[1]);
        socketsEscoltant[1] = socketEscoltador;
        printf("/*-------------------------------------------------------------------*/\n");
-       printf("/* CONVERSA ACABADA, vols seguir amb el programa?? ");
-       printf("/* Entre '1' per continuar '0' per acabar ");
+       printf("/* CONVERSA ACABADA, vols seguir amb el programa??\n");
+       printf("/* Entre '1' per continuar '0' per acabar.\n");
        printf("/*-------------------------------------------------------------------*/\n");
        fi = getNumber();
    }
@@ -213,23 +214,36 @@ int getNumber(){
 	char port[MAX_BUFFER];
 	bzero(port, '\0');
 	int res = readFromKeyboard(port, MAX_PORT);
-	printf("Has entrat el port %s\n",port);
 	EvalResult(res, NULL, 0); // Indiquem que no hi ha sockets amb un 0 i així no petarà.
 	int portNumber;
 	EvalResult(portNumber = atoi(port), NULL, 0); // indiquem que no hi ha sockets amb un 0 i així no petarà.
 	return portNumber;
 }
 
+/**
+ * Mostra per pantalla els valors nicknameR, portR i ipR
+ * Aquests valors son els valors de l'altre integrant de la connexió remota.
+ */
 int mostraDadesRemotes(char * nicknameR, int portR, char * ipR){
     printf("/*-------------------------------------------------------------------*/\n");
     printf("/* Establerta connexió amb %s a la ip %s i el port %i\n", nicknameR, ipR, portR);
     printf("/*-------------------------------------------------------------------*/\n");
 }
 
+/**
+ * Obté el nickname per teclat
+ * nickname conté el nick obtingut si tot va bé,
+ * retorna el nombe de bytes llegits si tot és correcte, un valor negatiu si no.
+ */
 int getNickname(char * nickname){
 	return readFromKeyboard(nickname, MAX_BUFFER);
 }
 
+/**
+ * Obté la ip per teclat
+ * ip conté el valor obtingut si tot va bé,
+ * retorna el nombe de bytes llegits si tot és correcte, un valor negatiu si no.
+ */
 int getIPAddress(char * ip){
 	return readFromKeyboard(ip, MAX_IP);
 }

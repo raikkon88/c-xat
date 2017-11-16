@@ -184,6 +184,11 @@ int MI_AcceptaConv(int SckEscMI, char *IPrem, int *portTCPrem, char *IPloc, int 
 	return socketActiu;
 }
 
+/**
+ * Descobreix el port i la ip locals assignades dinàmicament
+ * Retorna el port assignat o un número menor a 0 si va malament.
+ * ipLocal tindrà la ip assignada en cas que tot vagi bé.
+ */
 int MI_DescobreixIpIPortDinamic(int sck, char * ipLocal){
 
     struct sockaddr_in sin;
@@ -213,7 +218,10 @@ int MI_DescobreixIpIPortDinamic(int sck, char * ipLocal){
 }
 
 /**
- *
+ * Extreu tots els camps del paquet que ha arrivat.
+ * toParse conté el paquet, data tindrà el camp d'informació del paquet MI
+ * tipus tindrà el camp 'N' o 'L' del paquet MI
+ * bytes contindrà el nombre de bytes que conté el paquet MI
  */
 int MI_DesmontarProtocol(char * toParse, char * data, char * tipus, int bytes){
 
