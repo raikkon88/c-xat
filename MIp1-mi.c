@@ -187,9 +187,37 @@ int MI_AcceptaConv(int SckEscMI, char *IPrem, int *portTCPrem, char *IPloc, int 
     }
 	// if nbyteNick == ... return ...
 	return socketActiu;
-
 }
 
+int MI_DescobreixIpIPortDinamic(int sck){
+
+    struct sockaddr_in sin;
+    int addrlen = sizeof(sin);
+    int local_port = 0;
+    if(getsockname(sck, (struct sockaddr *)&sin, &addrlen) == 0 &&
+       sin.sin_family == AF_INET &&
+       addrlen == sizeof(sin))
+    {
+        local_port = ntohs(sin.sin_port);
+    }
+
+    FILE *fd;
+    char command[1024] = "ifconfig eth0 | grep \"inet addr\" | sed -r 's/ +/:/g' | cut -d \":\" -f 4";
+    char ipLocal[16];
+    fd = popen(command, "r");
+    if(fd == NULL){
+        return -1;
+    }
+    if(fgets(ipLocal, 1024, fd) == NULL) return -1;
+    ipLocal[strlen(ipLocal)-1]='\0';
+    int status = pclose(fd);
+    printf("Ip configurada de manera local : %s\nPort configurat de manera local : %i\n", ipLocal, local_port);
+    return status;
+}
+
+/**
+ *
+ */
 int MI_DesmontarProtocol(char * toParse, char * data, char * tipus, int bytes){
 
     char nombreBytes[3];
@@ -483,9 +511,9 @@ int TCP_TrobaAdrSockLoc(int Sck, char *IPloc, int *portTCPloc)
 	}
 	strcpy(IPloc, inet_ntoa(adrrem.sin_addr));
 	//portTCPloc = (int*)ntohs(adrrem.sin_port);
-	int res[1];
-	res[0] = ntohs(adrrem.sin_port);
-	portTCPloc = res;
+
+	portTCPloc = (int*)(intptr_t)ntohs(adrrem.sin_port);
+	//portTCPloc = res;
 }
 
 /* Donat el socket TCP “connectat” d’identificador “Sck”, troba l’adreça  */

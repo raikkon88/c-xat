@@ -19,6 +19,7 @@
 
 /* Definició de constants, p.e., #define MAX_LINIA 150                      */
 #define TECLAT 				0
+#define PORT_DEFECTE        0
 
 /* Definició de màxims de longitud dels diferents tipus d'string            */
 #define MAX_BUFFER 			300
@@ -56,18 +57,23 @@ int main(int argc,char *argv[])
    int nBytes;
    int res;
 
-   // -------------------------
-   // LLegim el port
-   port = getPort();
-   // LLegim el nickname
-   EvalResult(getNickname(nickname), NULL, 0);
+
 
    // Establim els sockets que escoltarem de moment.
    socketsEscoltant[0] = TECLAT;
-   socketsEscoltant[1] = MI_IniciaEscPetiRemConv(port);
-
+   socketsEscoltant[1] = MI_IniciaEscPetiRemConv(PORT_DEFECTE);
+   EvalResult(socketsEscoltant[1], socketsEscoltant, nSockets); // Evaluem el resultat de l'anterior instrucció
+   // Obtenim el port i la ip locals assignades dinàmicament.
+   int resultat = MI_DescobreixIpIPortDinamic(socketsEscoltant[1]);
+   EvalResult(resultat, socketsEscoltant, 2);
    printf("Benvingut %s , has configurat el port %i\n", nickname, port);
-   EvalResult(socketsEscoltant[1], socketsEscoltant, nSockets);
+
+   // -------------------------
+   // LLegim el port al que es connectarà
+   port = getPort();
+   // LLegim el nickname amb qui vol connectar-ser
+   EvalResult(getNickname(nickname), NULL, 0);
+
    nSockets = 2;
    int socketActiu;
 
@@ -111,7 +117,6 @@ int main(int argc,char *argv[])
    int resultatAccio = 1;
    while(resultatAccio > 0){
        bzero(missatge, MAX_BUFFER);
-       //fputs(promptLocal, stdout);
        socketActiu = MI_HaArribatLinia(socketsEscoltant[1]);
        if(socketActiu == TECLAT){
            EvalResult(readFromKeyboard(missatge, MAX_BUFFER), socketsEscoltant, nSockets);
@@ -122,11 +127,7 @@ int main(int argc,char *argv[])
        else{
            resultatAccio = MI_RepLinia(socketActiu, missatge);
            if(resultatAccio != 0){
-               //fseek(stdout, 0, SEEK_SET);
-               //fputs(promptRemot, stdout);
-               //puts(missatge);
-
-              printf("%s\n", missatge);
+               printf("%s%s\n", promptRemot, missatge);
            }
        }
    }
