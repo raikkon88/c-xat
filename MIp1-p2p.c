@@ -50,7 +50,7 @@ int main(int argc,char *argv[])
    bzero(missatge,      MAX_BUFFER);
 
    int port = 3000; // Valor per defecte.
-   int portLocal;
+   int portLocal=0;
 
    int socketsEscoltant[2];
    int nSockets = 1;
@@ -64,15 +64,16 @@ int main(int argc,char *argv[])
    socketsEscoltant[1] = MI_IniciaEscPetiRemConv(PORT_DEFECTE);
    EvalResult(socketsEscoltant[1], socketsEscoltant, nSockets); // Evaluem el resultat de l'anterior instrucció
    // Obtenim el port i la ip locals assignades dinàmicament.
-   int resultat = MI_DescobreixIpIPortDinamic(socketsEscoltant[1]);
-   EvalResult(resultat, socketsEscoltant, 2);
-   printf("Benvingut %s , has configurat el port %i\n", nickname, port);
+   portLocal = MI_DescobreixIpIPortDinamic(socketsEscoltant[1], ipLocal);
+   EvalResult(portLocal, socketsEscoltant, 2);
 
    // -------------------------
    // LLegim el port al que es connectarà
    port = getPort();
    // LLegim el nickname amb qui vol connectar-ser
    EvalResult(getNickname(nickname), NULL, 0);
+
+   printf("Benvingut %s , has configurat el port %i\n", nickname, port);
 
    nSockets = 2;
    int socketActiu;

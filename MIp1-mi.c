@@ -96,12 +96,12 @@ int MI_HaArribatPetiConv(int SckEscMI)
 int MI_DemanaConv(const char *IPrem, int portTCPrem, char *IPloc, int *portTCPloc, const char *NicLoc, char *NicRem)
 {
 	// crea socket Local
-	int SocketLocal = TCP_CreaSockClient("0.0.0.0",0);
+	int SocketLocal = TCP_CreaSockClient(IPloc, (int)portTCPloc);
 
 	//connectar al server
 	int sck= TCP_DemanaConnexio(SocketLocal,IPrem,portTCPrem);  // el socket de la conversa linia 108 esquelet.c
 	// Omple “IPloc*” i “portTCPloc*”
-	TCP_TrobaAdrSockLoc(sck,IPloc,portTCPloc);
+	//TCP_TrobaAdrSockLoc(sck,IPloc,portTCPloc);
 
 	// enviar i rebre nicknames falta fer... prob fallara
 	char nick[MAX_LINE];
@@ -151,9 +151,9 @@ int MI_AcceptaConv(int SckEscMI, char *IPrem, int *portTCPrem, char *IPloc, int 
         return -1;
     }
 	// Omple “IPloc*” i “portTCPloc*”
-	if(TCP_TrobaAdrSockLoc(socketActiu,IPloc,portTCPloc)==-1){
-        return -1;
-    }
+	// if(TCP_TrobaAdrSockLoc(socketActiu,IPloc,portTCPloc)==-1){
+    //     return -1;
+    // }
 
     if(TCP_TrobaAdrSockRem(socketActiu, IPrem, portTCPrem) == -1){
         return -1;
@@ -189,7 +189,7 @@ int MI_AcceptaConv(int SckEscMI, char *IPrem, int *portTCPrem, char *IPloc, int 
 	return socketActiu;
 }
 
-int MI_DescobreixIpIPortDinamic(int sck){
+int MI_DescobreixIpIPortDinamic(int sck, char * ipLocal){
 
     struct sockaddr_in sin;
     int addrlen = sizeof(sin);
@@ -198,12 +198,13 @@ int MI_DescobreixIpIPortDinamic(int sck){
        sin.sin_family == AF_INET &&
        addrlen == sizeof(sin))
     {
-        local_port = ntohs(sin.sin_port);
+        local_port = (int)ntohs(sin.sin_port);
     }
 
+    //printf("%i\n", (int) portLocal);
     FILE *fd;
     char command[1024] = "ifconfig | head -n 2 | grep \"inet addr\" | sed -r 's/ +/:/g' | cut -d \":\" -f 4";
-    char ipLocal[16];
+    //char ipLocal[16];
     fd = popen(command, "r");
     if(fd == NULL){
         return -1;
@@ -212,7 +213,8 @@ int MI_DescobreixIpIPortDinamic(int sck){
     ipLocal[strlen(ipLocal)-1]='\0';
     int status = pclose(fd);
     printf("Ip configurada de manera local : %s\nPort configurat de manera local : %i\n", ipLocal, local_port);
-    return status;
+    if(status < 0) return status;
+    else return local_port;
 }
 
 /**
